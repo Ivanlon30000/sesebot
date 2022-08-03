@@ -133,3 +133,5 @@ dmypy.json
 token.json
 
 log/*
+tmp.*
+**/tmp.*
