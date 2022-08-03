@@ -12,7 +12,7 @@ from utils.feed import random_feed_interactive, to_photo
 
 
 CONFIG = get_config()
-logger = get_logger(__name__ if __name__ != "__main__" else __file__)
+logger = get_logger(__name__)
 
 logger.info("Connecting Redis db: {}:{}".format(
     CONFIG["db_host"], CONFIG["db_port"]))

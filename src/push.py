@@ -6,7 +6,7 @@ from utils import get_database, get_logger
 import telebot
 import json
 
-logger = get_logger(__name__ if __name__ != "__main__" else __file__)
+logger = get_logger(__name__)
 
 with open("token.json") as fp:
     _token = json.load(fp)
