@@ -14,7 +14,6 @@ bot = telebot.TeleBot(_token["bot"])
 
 db, _ = get_database()
 
-whiteList = {"5419802064"}
 whiteList = []
 
 def push(text:str):
