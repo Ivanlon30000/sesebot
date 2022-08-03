@@ -8,7 +8,7 @@ from utils import PixivIllust, get_agent, get_config, get_database, get_logger
 
 CONFIG = get_config()
 
-logger = get_logger("grab")
+logger = get_logger(__name__ if __name__ != "__main__" else __file__)
 
 REDIS_HOST = CONFIG["db_host"]
 REDIS_PORT = CONFIG["db_port"]

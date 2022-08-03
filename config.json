@@ -6,5 +6,5 @@
     "interval": 600,
     "error_interval": 30,
     "expire": 86400,
-    "recommend_num": 20
+    "recommend_num": 60
 }

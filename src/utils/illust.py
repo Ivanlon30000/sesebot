@@ -11,7 +11,7 @@ from .enums import *
 # illust
 class PixivIllust:
     id: int
-    fp: BytesIO
+    fp: Union[BytesIO, str]
     filesize: int
     authTags: List[str]
     rating: Rating
@@ -20,7 +20,9 @@ class PixivIllust:
     size: Tuple[int, int]
     createdTime: int
 
-    def __init__(self, pixiv_agent, id: int = None, illust: Dict = None, rawdir: str = None, size: IllustSize = IllustSize.LARGE) -> None:
+    def __init__(self, pixiv_agent, id: int = None, illust: Dict = None, 
+                 rawdir: str = None, size: IllustSize = IllustSize.LARGE,
+                 mode: str="") -> None:
         assert id is not None or illust is not None
         self.agent = pixiv_agent
         if illust is not None:
@@ -49,9 +51,13 @@ class PixivIllust:
 
         self.title = illust["title"]
         self.size = (illust["width"], illust["height"])
-        self.fp = BytesIO()
-        self.agent.download(url, fname=self.fp)
-        self.filesize = len(self.fp.getvalue())
+        if mode:
+            self.fp = BytesIO()
+            self.agent.download(url, fname=self.fp)
+            self.filesize = len(self.fp.getvalue())
+        else:
+            self.fp = url.replace("i.pximg.net", "i.pixiv.re")
+            self.filesize = 0
         self.authTags = [x["name"] for x in illust["tags"]]
         self.rating = Rating.EXPLICIT if illust["x_restrict"] == 1 else Rating.UNKNOWN
         if illust["type"] == "illust":
@@ -77,7 +83,7 @@ class PixivIllust:
     def toDict(self) -> Dict[str, str]:
         return {
             "id": self.id,
-            "img": base64.b64encode(self.fp.getvalue()).decode(),
+            "img": base64.b64encode(self.fp.getvalue()).decode() if isinstance(self.fp, BytesIO) else self.fp,
             "filesize": self.filesize,
             "authTags": ','.join(self.authTags),
             "rating": self.rating.name,
