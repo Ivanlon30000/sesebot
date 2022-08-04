@@ -2,11 +2,29 @@ import base64
 import json
 import os
 import time
+from enum import Enum, auto
 from io import BytesIO
 from typing import *
 
-from .enums import *
 
+class Rating(Enum):
+    UNKNOWN = U = auto()
+    GENERAL = G = auto()
+    SENSITIVE = S = auto()
+    QUESTIONABLE = Q = auto()
+    EXPLICIT = E = auto()
+
+
+class IllustType(Enum):
+    ILLUST = auto()
+    UGOIRA = auto()
+    UNKNOWN = auto()
+
+
+class IllustSize(Enum):
+    MEDIUM = auto()
+    LARGE = auto()
+    ORIGINAL = auto()
 
 # illust
 class PixivIllust:

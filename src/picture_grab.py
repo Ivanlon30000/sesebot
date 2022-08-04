@@ -3,9 +3,8 @@ from typing import *
 
 from pixivpy3.utils import PixivError
 
-from utils import PixivIllust
 from utils.basic_config import get_config, get_database, get_logger
-from pixiv import get_agent
+from pixiv import get_agent, PixivIllust
 
 
 CONFIG = get_config()

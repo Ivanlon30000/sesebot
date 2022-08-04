@@ -1,20 +1,15 @@
-import json
 import logging
 import os
 import sys
 from typing import *
-
+from utils import CONFIG
 import redis
 
-# load config
-with open("config.json") as fp:
-    CONFIG = json.load(fp)
-BASE_FMT = "{asctime} [{levelname}]\t{message}"
 
+BASE_FMT = "{asctime} [{levelname}]\t{message}"
 
 def get_config() -> Dict[str, Any]:
     return CONFIG
-
 
 def get_logger(name: str, fileLogLevel=logging.DEBUG, streamLogLevel=logging.INFO) -> logging.Logger:
     logger = logging.getLogger(name)

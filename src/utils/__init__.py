@@ -1,2 +1,1 @@
-from .enums import *
-from .Illust import PixivIllust
+from .const import CONFIG, TOKEN

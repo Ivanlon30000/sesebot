@@ -5,14 +5,11 @@ from typing import *
 import telebot
 from telebot.types import *
 from telebot.util import quick_markup
-from utils import PixivIllust
 
-from utils.basic_config import get_config, get_database, get_logger
-from utils.feed import random_feed_interactive, to_photo
 from pixiv import illust_bookmark_add
-
-
-CONFIG = get_config()
+from utils.basic_config import get_database, get_logger
+from utils.const import CONFIG, TOKEN
+from utils.feed import random_feed_interactive, to_photo
 
 logger = get_logger("bot")
 
@@ -21,17 +18,15 @@ logger.info("Connecting Redis db: {}:{}".format(
 db, _ = get_database()
 logger.info("Redis db connected")
 
-with open("token.json") as fp:
-    _token = json.load(fp)
-whitelist = _token["whitelist"]
-bot = telebot.TeleBot(_token["bot"])
+whitelist = TOKEN["whitelist"]
+bot = telebot.TeleBot(TOKEN["bot"])
 
 @bot.message_handler(commands=["start", "help"])
 def start(message: Message):
     bot.reply_to(message, "说，你想涩涩")
     
 
-@bot.message_handler(regexp=r"(se|色|涩){2}|(se|色|涩)(图|tu)")
+@bot.message_handler(regexp=r"(se|色|涩){2}|(se|色|涩)(图|tu)|不够涩")
 def sese(message: Message):
     logger.debug(f"Receive msg: {message}")
     chat_id = message.chat.id

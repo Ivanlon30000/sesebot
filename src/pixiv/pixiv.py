@@ -1,22 +1,12 @@
-import json
 from typing import *
 
 import pixivpy3
-
-from utils.Illust import PixivIllust
 from utils.basic_config import get_logger
 
+from . import API
+from .types import PixivIllust
+
 logger = get_logger(__name__)
-
-with open("token.json") as fp:
-    _token = json.load(fp)
-
-API = pixivpy3.AppPixivAPI()
-API.auth(refresh_token=_token["pixiv"])
-
-def get_agent() -> pixivpy3.AppPixivAPI:
-    logger.info(f"Get Pixiv agent {API}")
-    return API
 
 def illust_bookmark_add(illust:Union[str, int, PixivIllust, Dict[str, Any]], restrict:str="public", userTags:Optional[List[str]]=None):
     logger.debug(f"Bookmark ({type(illust)}){illust}")

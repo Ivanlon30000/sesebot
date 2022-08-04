@@ -2,15 +2,14 @@ from typing import *
 import schedule
 import time
 from utils.feed import random_feed, to_photo
-from utils import get_database, get_logger
+from utils.basic_config import get_database, get_logger
 import telebot
 import json
+from utils.const import TOKEN
 
 logger = get_logger("push")
 
-with open("token.json") as fp:
-    _token = json.load(fp)
-bot = telebot.TeleBot(_token["bot"])
+bot = telebot.TeleBot(TOKEN["bot"])
 
 db, _ = get_database()
 
