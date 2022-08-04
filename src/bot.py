@@ -26,7 +26,7 @@ def start(message: Message):
     bot.reply_to(message, "说，你想涩涩")
     
 
-@bot.message_handler(regexp=r"(se|色|涩){2}|(se|色|涩)(图|tu)|不够涩")
+@bot.message_handler(regexp=r"(se|色|涩){2}|(se|色|涩)(图|tu)|不够[涩色]")
 def sese(message: Message):
     logger.debug(f"Receive msg: {message}")
     chat_id = message.chat.id
