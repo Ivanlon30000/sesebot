@@ -132,6 +132,7 @@ dmypy.json
 # personal privacy
 token.json
 config.json
+
 log/*
 tmp.*
 **/tmp.*
