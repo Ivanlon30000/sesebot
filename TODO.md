@@ -1,1 +1,2 @@
- - [ ] Filter R-18 Tag
+ - [x] Filter R-18 Tag
+ - [ ] Push b/w stocking

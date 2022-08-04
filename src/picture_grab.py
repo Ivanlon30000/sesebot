@@ -52,6 +52,8 @@ def grab(num:int, expire:int) -> List[int]:
                 logger.warning(
                     "Download {}: Pixiv Error, skip.".format(illust["id"]))
                 continue
+            if "R-18" in illustObj.authTags:
+                continue
             logger.info("Illust {} added.".format(illust["id"]))
             # db.sadd("illusts", illust["id"])
             key = "illust:{}".format(illust["id"])
