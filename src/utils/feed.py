@@ -1,7 +1,7 @@
 from io import BytesIO
 from typing import *
 import random
-from utils import get_logger
+from utils.basic_config import get_logger
 import base64
 
 logger = get_logger(__name__)
@@ -22,6 +22,7 @@ def random_feed_interactive(db, chatid:int):
         # else:
         #     photo = BytesIO(base64.b64decode(illust["img"]))
         # yield photo
+        db.sadd(f"user_seen:{chatid}", illustId)
         yield illust
     else:
         yield None

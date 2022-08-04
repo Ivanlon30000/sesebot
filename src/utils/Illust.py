@@ -14,6 +14,7 @@ class PixivIllust:
     fp: Union[BytesIO, str]
     filesize: int
     authTags: List[str]
+    userTags: List[str]
     rating: Rating
     type: IllustType
     title: str
@@ -56,9 +57,11 @@ class PixivIllust:
             self.agent.download(url, fname=self.fp)
             self.filesize = len(self.fp.getvalue())
         else:
-            self.fp = url.replace("i.pximg.net", "i.pixiv.re")
+            self.fp = url.replace("i.pximg.net", "i.pixiv.cat")
             self.filesize = 0
         self.authTags = [x["name"] for x in illust["tags"]]
+        # TODO: user tag
+        self.userTags = []
         self.rating = Rating.EXPLICIT if illust["x_restrict"] == 1 else Rating.UNKNOWN
         if illust["type"] == "illust":
             self.type = IllustType.ILLUST
@@ -75,6 +78,7 @@ class PixivIllust:
             "size": ','.join(str(x) for x in self.size),
             "filesize": self.filesize,
             "authTags": ','.join(self.authTags),
+            "userTags": ','.join(self.userTags),
             "rating": self.rating.name,
             "type": self.type.name,
             "createdTime": self.createdTime
@@ -86,6 +90,7 @@ class PixivIllust:
             "img": base64.b64encode(self.fp.getvalue()).decode() if isinstance(self.fp, BytesIO) else self.fp,
             "filesize": self.filesize,
             "authTags": ','.join(self.authTags),
+            "userTags": ','.join(self.userTags),
             "rating": self.rating.name,
             "type": self.type.name,
             "title": self.title,

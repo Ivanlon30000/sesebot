@@ -9,6 +9,7 @@ import redis
 # load config
 with open("config.json") as fp:
     CONFIG = json.load(fp)
+BASE_FMT = "{asctime} [{levelname}]\t{message}"
 
 
 def get_config() -> Dict[str, Any]:
@@ -24,12 +25,12 @@ def get_logger(name: str, fileLogLevel=logging.DEBUG, streamLogLevel=logging.INF
         os.path.join(CONFIG["log_path"], f"{name}.log"))
     hdlrFile.setLevel(logging.DEBUG)
     hdlrFile.setFormatter(logging.Formatter(
-        fmt="{asctime} [{levelname}]\t{message}", style="{", datefmt="%Y/%m/%d %H:%M:%S"))
+        fmt=BASE_FMT, style="{", datefmt="%Y/%m/%d %H:%M:%S"))
 
     hdlrStream = logging.StreamHandler(stream=sys.stdout)
     hdlrStream.setLevel(logging.INFO)
     hdlrStream.setFormatter(logging.Formatter(
-        fmt="{name} - {asctime} [{levelname}]\t{message}", style="{", datefmt="%Y/%m/%d %H:%M:%S"))
+        fmt="{name: >16s} - "+BASE_FMT, style="{", datefmt="%Y/%m/%d %H:%M:%S"))
 
     logger.addHandler(hdlrFile)
     logger.addHandler(hdlrStream)
