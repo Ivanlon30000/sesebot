@@ -15,5 +15,5 @@ def get_agent() -> pixivpy3.AppPixivAPI:
     return API
 
 # imports
-from .pixiv import *
+from .aapi import *
 from .types import *

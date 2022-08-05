@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import time
+from collections import UserDict
 from enum import Enum, auto
 from io import BytesIO
 from typing import *
@@ -41,7 +42,8 @@ class PixivIllust:
 
     def __init__(self, pixiv_agent, id: int = None, illust: Dict = None, 
                  rawdir: str = None, size: IllustSize = IllustSize.LARGE,
-                 mode: str="") -> None:
+                 mode: str="url") -> None:
+        super().__init__()
         assert id is not None or illust is not None
         self.agent = pixiv_agent
         if illust is not None:
@@ -70,13 +72,15 @@ class PixivIllust:
 
         self.title = illust["title"]
         self.size = (illust["width"], illust["height"])
-        if mode:
+        if mode == "download":
             self.fp = BytesIO()
             self.agent.download(url, fname=self.fp)
             self.filesize = len(self.fp.getvalue())
-        else:
+        elif mode == "url":
             self.fp = url.replace("i.pximg.net", "i.pixiv.cat")
             self.filesize = 0
+        else:
+            raise ValueError(f"Param mode must be one of 'download', 'url'")
         self.authTags = [x["name"] for x in illust["tags"]]
         # TODO: user tag
         self.userTags = []
@@ -102,6 +106,12 @@ class PixivIllust:
             "createdTime": self.createdTime
         }, ensure_ascii=False, indent=4)
 
+    def __getitem__(self, key):
+        return self.__getattribute__(key)
+    
+    def __setitem__(self, key, item) -> None:
+        return self.__setattr__(key, item)
+    
     def toDict(self) -> Dict[str, str]:
         return {
             "id": self.id,
