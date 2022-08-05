@@ -10,6 +10,7 @@ from pixiv import illust_bookmark_add
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
 from utils.feed import random_feed_interactive, to_photo
+import time
 
 logger = get_logger("bot")
 
@@ -31,7 +32,10 @@ def sese(message: Message):
     chat_id = message.chat.id
     feed = random_feed_interactive(db, chat_id)
     if feed.__next__():
+        start = time.time()
         bot.reply_to(message, "涩图来力！")
+        end = time.time()
+        logger.info(f"Replying costs {end-start:.3f}s")
         illust = feed.__next__()
         photo = to_photo(illust["img"])
         caption = '\n'.join([
@@ -46,8 +50,10 @@ def sese(message: Message):
             })
         else:
             markup = None
+        start = time.time()
         bot.send_photo(message.chat.id, photo=photo, caption=caption, reply_markup=markup)
-        logger.info("Image sent")
+        end = time.time()
+        logger.info(f"Image sent, costs {end-start:.2f}s")
     else:
         logger.info("No image available.")
         bot.send_sticker(message.chat.id, "CAACAgUAAxkDAAMcYuoPdZi1WU9ph-DxAf7i9d5uIvsAAqIFAAKX3FBXvDeSjH2iYu4pBA")
