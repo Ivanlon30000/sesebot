@@ -6,7 +6,8 @@ from utils import CONFIG
 import redis
 
 
-BASE_FMT = "{asctime} [{levelname}]\t{message}"
+BASE_FMT = logging.Formatter("{asctime} - {levelname}: {message}", style="{", datefmt="%Y/%m/%d %H:%M:%S")
+MODULE_FMT = logging.Formatter("{asctime} - {levelname}: [{name}] {message}",  style="{", datefmt="%Y/%m/%d %H:%M:%S")
 
 def get_config() -> Dict[str, Any]:
     return CONFIG
@@ -16,19 +17,20 @@ def get_logger(name: str, fileLogLevel=logging.DEBUG, streamLogLevel=logging.INF
     logger.setLevel(logging.DEBUG)
 
     os.makedirs(CONFIG["log_path"], exist_ok=True)
-    hdlrFile = logging.FileHandler(
-        os.path.join(CONFIG["log_path"], f"{name}.log"))
-    hdlrFile.setLevel(logging.DEBUG)
-    hdlrFile.setFormatter(logging.Formatter(
-        fmt=BASE_FMT, style="{", datefmt="%Y/%m/%d %H:%M:%S"))
-
-    hdlrStream = logging.StreamHandler(stream=sys.stdout)
-    hdlrStream.setLevel(logging.INFO)
-    hdlrStream.setFormatter(logging.Formatter(
-        fmt="{name: >16s} - "+BASE_FMT, style="{", datefmt="%Y/%m/%d %H:%M:%S"))
-
+    hdlrFile = logging.FileHandler(os.path.join(CONFIG["log_path"], f"{name}.log"))
+    hdlrFile.setLevel(fileLogLevel)
+    hdlrFile.setFormatter(BASE_FMT)
     logger.addHandler(hdlrFile)
+    
+    hdlrStream = logging.StreamHandler(stream=sys.stdout)
+    hdlrStream.setLevel(streamLogLevel)
+    hdlrStream.setFormatter(MODULE_FMT)
     logger.addHandler(hdlrStream)
+    
+    hdlrAll = logging.FileHandler(os.path.join(CONFIG["log_path"], "main.log"))
+    hdlrAll.setLevel(fileLogLevel)
+    hdlrAll.setFormatter(MODULE_FMT)
+    logger.addHandler(hdlrAll)
     
     return logger
 

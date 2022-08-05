@@ -1,5 +1,6 @@
 {
     "pixiv": "YOUR_PIXIV_REFRESH_TOKEN",
     "bot": "YOUR_TELEGRAM_BOT_TOKEN",
-    "whitelist": [1234567890]
+    "whitelist": [1234567890],
+    "chatid_me": 987654321
 }
