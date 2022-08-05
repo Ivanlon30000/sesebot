@@ -18,7 +18,6 @@ logger.info("Connecting Redis db: {}:{}".format(
 db, _ = get_database()
 logger.info("Redis db connected")
 
-whitelist = TOKEN["whitelist"]
 bot = telebot.TeleBot(TOKEN["bot"])
 
 @bot.message_handler(commands=["start", "help"])
@@ -41,7 +40,7 @@ def sese(message: Message):
             "Tags: {}".format(', '.join('#' + x for x in illust["authTags"].split(',')))
         ])
         
-        if chat_id in whitelist:
+        if chat_id == TOKEN["chatid_me"]:
             markup = quick_markup({
                 'bookmark!': {'callback_data': 'like:'+illust["id"]}
             })
