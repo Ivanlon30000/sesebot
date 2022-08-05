@@ -1,2 +1,3 @@
  - [x] Filter R-18 Tag
  - [ ] Push b/w stocking in real-time manner
+ - [ ] Push follow
