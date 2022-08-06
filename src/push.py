@@ -9,7 +9,6 @@ from utils.basic_config import get_database, get_logger
 from utils.const import TOKEN
 from utils.feed import feed_all_interactive, random_feed
 
-
 logger = get_logger("push")
 bot = telebot.TeleBot(TOKEN["bot"])
 db, _ = get_database()

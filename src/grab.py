@@ -1,11 +1,13 @@
-from typing import *
-from utils.const import TOKEN, CONFIG
-from pixiv.grab import PixivRecommendedGrab, TagsFilter, PixivFollowGrab
-from pixiv import get_agent
-from pixivpy3 import PixivError
-from utils.basic_config import get_logger, get_database
-import schedule
 import time
+from typing import *
+
+import schedule
+from pixivpy3 import PixivError
+
+from pixiv import get_agent
+from pixiv.grab import PixivFollowGrab, PixivRecommendedGrab, TagsFilter
+from utils.basic_config import get_database, get_logger
+from utils.const import CONFIG, TOKEN
 
 logger = get_logger("grab2")
 db, _ = get_database()

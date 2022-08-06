@@ -10,8 +10,11 @@ def bot_send_illust(bot, chatId:int, illust:Dict[str, Any], withButton:bool=True
         })
     else:
         markup = None
-    bot.send_photo(chatId, to_photo(illust["img"]), caption='\n'.join([
+    lines = [
         illust["title"],
         "Pixiv: https://www.pixiv.net/artworks/{}".format(illust["id"]),
-        "Tags: {}".format(', '.join('#' + x for x in illust["authTags"].split(',')))
-    ]), reply_markup=markup)
+    ]
+    if "author" in illust:
+        lines.append(f"Artist: {illust['author']}")
+    lines.append("Tags: {}".format(', '.join('#' + x for x in illust["authTags"].split(','))))
+    bot.send_photo(chatId, to_photo(illust["img"]), caption='\n'.join(), reply_markup=markup)

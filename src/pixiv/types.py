@@ -39,6 +39,8 @@ class PixivIllust:
     rating: Rating
     type: IllustType
     title: str
+    author: str
+    authorId: int
     size: Tuple[int, int]
     createdTime: int
 
@@ -75,6 +77,8 @@ class PixivIllust:
             raise ValueError(f"Unsupport illust size")
 
         self.title = illust["title"]
+        self.author = illust["user"]["name"]
+        self.authorId = illust["user"]["id"]
         self.size = (illust["width"], illust["height"])
         if mode == "download":
             assert self.agent is not None

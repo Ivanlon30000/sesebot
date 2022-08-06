@@ -1,5 +1,6 @@
 import datetime
 import re
+import time
 from typing import *
 
 import telebot
@@ -11,7 +12,6 @@ from pixiv import illust_bookmark_add
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
 from utils.feed import random_feed_interactive, to_photo
-import time
 
 logger = get_logger("bot")
 
