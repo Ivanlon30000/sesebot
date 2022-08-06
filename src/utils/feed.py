@@ -25,6 +25,7 @@ def feed_all_interactive(db:Redis, chatid:int, group:str) -> Generator[PixivIllu
     if len(imglist) > 0:
         for illustId in imglist:
             illust = db.hgetall(f"{group}:{illustId}")
+            logger.debug(illust)
             illust = PixivIllust(dbDict=illust)
             db.sadd(f"user_seen:{chatid}", illustId)
             yield illust

@@ -7,10 +7,11 @@ import telebot
 from telebot.types import *
 
 from bot import bot_send_illust
-from pixiv import illust_bookmark_add, PixivIllust
+from pixiv import illust_bookmark_add, illust_image_urls
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
 from utils.feed import random_feed_interactive
+from telebot.types import InputMediaPhoto
 
 logger = get_logger("bot")
 
@@ -62,8 +63,10 @@ def echo_query(query: CallbackQuery):
 
 @bot.callback_query_handler(func=lambda x: re.match(r"seeall:\d+", x.data))
 def seeall(query: CallbackQuery):
-    # TODO: See all query
-    pass
+    logger.debug(f"seeall query: {query}")
+    _, iid = query.data.split(":")
+    media = [InputMediaPhoto(url) for url in  illust_image_urls(iid)]
+    bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id)
 
 @bot.message_handler(func=lambda x: True)
 def echo(message: Message):

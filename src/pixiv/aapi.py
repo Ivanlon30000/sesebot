@@ -1,6 +1,7 @@
 from typing import *
 
 import pixivpy3
+from pixivpy3.utils import PixivError
 from utils.basic_config import get_logger
 
 from . import API
@@ -40,3 +41,19 @@ def illust_bookmark_add(illust: Union[str, int, PixivIllust, Dict[str, Any]],
     res = API.illust_bookmark_add(illustId, restrict=restrict, tags=tags)
     logger.debug(f"Respose: {res}")
     return res
+
+def illust_image_urls(iid:int) -> List[str]:
+    logger.info(f"Getting illust images for {iid}")
+    try:
+        illust = API.illust_detail(iid)["illust"]
+    except (PixivError, KeyError):
+        return None
+
+    pageCount = illust["page_count"]
+    if pageCount > 1:
+        urls = [x["image_urls"]["large"].replace("i.pximg.net", "i.pixiv.cat") for x in illust["meta_pages"]]
+    else:
+        urls = [illust["image_urls"]["large"]]
+    logger.info(f"{pageCount} pages: {urls}")
+    return urls
+    

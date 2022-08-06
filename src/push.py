@@ -42,13 +42,13 @@ def follow_push():
     if num > 0:
         bot.send_message(ME, f"有{num}张新的涩图辣！")
         for illust in feed:
-            logger.info(f"Push follow illust: {illust['id']}")
+            logger.info(f"Push follow illust: {illust}")
             bot_send_illust(bot, ME, illust, group=group)
 
-schedule.every(10).minutes.do(follow_push)
-
+push_job = schedule.every(10).minutes.do(follow_push)
 
 logger.info(f"{len(schedule.get_jobs())} push schedule running")
+push_job.run()
 while True:
     schedule.run_pending()
     time.sleep(10)
