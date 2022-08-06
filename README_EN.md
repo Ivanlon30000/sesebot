@@ -6,7 +6,7 @@
 `pip install -r requirements.txt`  
 
 ## Config
-1. Create Telegram Bot
+1. Create Telegram Bot  
 Create your Telegram bot cccording to [Official Docs](https://core.telegram.org/bots#3-how-do-i-create-a-bot), and get the token of your telegram bot.
 
 2. Get Pixiv refresh token  
