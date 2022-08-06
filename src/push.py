@@ -24,7 +24,7 @@ def daily_push(text:str):
             if illust is not None:
                 logger.info(f"Push {illust.id} to {chatId}, text: {text}")
                 bot.send_message(chatId, text)
-                bot_send_illust(bot, chatId, illust, chatId==ME)
+                bot_send_illust(bot, chatId, illust)
             else:
                 pass
 

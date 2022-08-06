@@ -81,7 +81,7 @@ def seeall(query: CallbackQuery):
         remove_reply_markup_item(bot, query.message, "全部")
         logger.info(f"Reply markup modified")
     else:
-        bot.send_message(f"出错力！")
+        bot.send_message(query.message.chat.id, f"出错力！")
         
 @bot.message_handler(commands=["/ping"])
 def echo_chatid(message: Message):
