@@ -1,18 +1,20 @@
 import json
 import pixivpy3
-
-with open("token.json") as fp:
-    _token = json.load(fp)
+from utils import TOKEN
 
 # init agent
 API = pixivpy3.AppPixivAPI()
-API.auth(refresh_token=_token["pixiv"])
+API.auth(refresh_token=TOKEN["pixiv"])
 
 
 # functions
 def get_agent() -> pixivpy3.AppPixivAPI:
     logger.info(f"Get Pixiv agent {API}")
     return API
+
+def refresh_token() -> None:
+    logger.info("Refresh token")
+    API.auth(refresh_token=TOKEN["pixiv"])
 
 # imports
 from .aapi import *

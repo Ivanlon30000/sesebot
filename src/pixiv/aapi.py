@@ -3,6 +3,7 @@ from typing import *
 import pixivpy3
 from pixivpy3.utils import PixivError
 from utils.basic_config import get_logger
+from traceback import format_exc, format_exc
 
 from . import API
 from .types import PixivIllust
@@ -28,8 +29,7 @@ def illust_bookmark_add(illust: Union[str, int, PixivIllust, Dict[str, Any]],
         tags = (illust.userTags + illust.authTags)
     elif isinstance(illust, dict):
         illustId = illust["id"]
-        tags = illust["authTags"].split(',') if isinstance(
-            illust["authTags"], str) else illust["authTags"]
+        tags = illust["authTags"].split(',') if isinstance(illust["authTags"], str) else illust["authTags"]
     else:
         raise ValueError(
             f"Param 'illust' type incorrect, should be one of str, int, PixivIllust and Dict[str, Any]")
@@ -47,6 +47,7 @@ def illust_image_urls(iid:int) -> List[str]:
     try:
         illust = API.illust_detail(iid)["illust"]
     except (PixivError, KeyError):
+        logger.error(f"Getting illust images for {iid} error {format_exc()}")
         return None
 
     pageCount = illust["page_count"]
