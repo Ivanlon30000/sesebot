@@ -56,8 +56,7 @@ _defaultFilter = [AllpassFilter()]
 class GrabBase(ABC):
     """Grab 基类
     """
-    def __init__(self, db, num:int=60, expire:int=86400, 
-                 interval:Optional[int]=None, errInterval:Optional[int]=None,                 
+    def __init__(self, db, num:int=60, expire:int=86400,            
                  filters:Union[Iterable[IllustFilter], IllustFilter]=_defaultFilter,
                  extraFilters: Union[Iterable[IllustFilter], IllustFilter]=[]) -> None:
         """用于抓取图片
@@ -66,15 +65,11 @@ class GrabBase(ABC):
             db: redis database
             num (int, optional): 每次最大拉去数量. Defaults to 60.
             expire (int, optional): 过期时间/秒. Defaults to 86400.
-            interval (Optional[int], optional): 仅自动抓取有效，执行抓取间隔/秒. Defaults to None.
-            errInterval (Optional[int], optional): 仅自动抓取有效，抓取错误时的检测/秒. Defaults to None.
             filters (Union[Iterable[IllustFilter], IllustFilter], optional): 过滤器. Defaults to allpass_filter.
         """
         self.db = db
         self.maxNum = num
         self.expireTime = expire
-        self.interval = interval
-        self.errInterval = errInterval
         self.filters = (filters if isinstance(filters, Iterable) else [filters]) + extraFilters
     
     @abstractmethod
@@ -106,13 +101,12 @@ class GrabBase(ABC):
         logger.info(f"Grab done: {len(illusts)} illusts")
         return illusts
                 
-    def run(self) -> None:
+    def run(self, interval:int=3600, errInterval:Optional[int]=30) -> None:
         """阻塞式自动抓取
         """
-        assert self.interval is not None
         while True:
             result = self.grab()
-            sleepTime = self.errInterval if self.errInterval is not None and result is None else self.interval
+            sleepTime = errInterval if errInterval is not None and result is None else interval
             logger.info(f"Sleep for {sleepTime}s")
             time.sleep(sleepTime)
 
@@ -121,10 +115,9 @@ class PixivRecommendedGrab(GrabBase):
     """抓取 pixiv 推荐
     """
     def __init__(self, db, papi, num: int = 60, expire: int = 86400,
-                 interval: Optional[int] = None, errInterval: Optional[int] = None,
                  filters: Union[Iterable[IllustFilter], IllustFilter] = _defaultFilter,
                  extraFilters: Union[Iterable[IllustFilter], IllustFilter]=[]) -> None:
-        super().__init__(db, num, expire, interval, errInterval, filters, extraFilters)
+        super().__init__(db, num, expire, filters, extraFilters)
         self.papi = papi
         
     def source(self) -> List[PixivIllust]:
