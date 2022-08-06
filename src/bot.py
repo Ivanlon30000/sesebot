@@ -5,13 +5,12 @@ from typing import *
 
 import telebot
 from telebot.types import *
-from telebot.util import quick_markup
 
 from bot import bot_send_illust
-from pixiv import illust_bookmark_add
+from pixiv import illust_bookmark_add, PixivIllust
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
-from utils.feed import random_feed_interactive, to_photo
+from utils.feed import random_feed_interactive
 
 logger = get_logger("bot")
 
@@ -41,9 +40,10 @@ def sese(message: Message):
         bot.send_sticker(message.chat.id, "CAACAgUAAxkDAAMcYuoPdZi1WU9ph-DxAf7i9d5uIvsAAqIFAAKX3FBXvDeSjH2iYu4pBA")
         bot.send_message(message.chat.id, "还要涩涩？还要涩涩？还要涩涩？")
 
-@bot.callback_query_handler(func=lambda x: re.match(r"like:\d+", x.data))
+
+@bot.callback_query_handler(func=lambda x: re.match(r"like:\w+:\d+", x.data))
 def echo_query(query: CallbackQuery):
-    parts = query.data.split(':')[-1]
+    parts = query.data.split(':')
     if len(parts) == 3:
         _, group, illustId = parts
     else:
@@ -58,7 +58,12 @@ def echo_query(query: CallbackQuery):
         bot.reply_to(query.message, f"{illustId}收藏出错")
     else:
         bot.reply_to(query.message, f"{illustId}已收藏")
-        
+
+
+@bot.callback_query_handler(func=lambda x: re.match(r"seeall:\d+", x.data))
+def seeall(query: CallbackQuery):
+    # TODO: See all query
+    pass
 
 @bot.message_handler(func=lambda x: True)
 def echo(message: Message):

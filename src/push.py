@@ -22,7 +22,7 @@ def daily_push(text:str):
         if len(WHITELIST) == 0 or chatId in WHITELIST:
             illust = random_feed(db, chatId)
             if illust is not None:
-                logger.info(f"Push {illust['id']} to {chatId}, text: {text}")
+                logger.info(f"Push {illust.id} to {chatId}, text: {text}")
                 bot.send_message(chatId, text)
                 bot_send_illust(bot, chatId, illust, chatId==ME)
             else:
@@ -39,7 +39,7 @@ def follow_push():
     feed = feed_all_interactive(db, ME, group=group)
     num = feed.__next__()
     logger.info(f"{num} new follow")
-    if  num > 0:
+    if num > 0:
         bot.send_message(ME, f"有{num}张新的涩图辣！")
         for illust in feed:
             logger.info(f"Push follow illust: {illust['id']}")

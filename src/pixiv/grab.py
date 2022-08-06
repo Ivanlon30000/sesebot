@@ -40,35 +40,25 @@ class UniqueFilter(FilterBase):
         return [illust for illust in illusts if str(illust.id) not in existIllust]
 
 class TagsFilter(FilterBase):
-    def __init__(self, hasTags:Union[str,Iterable[str]]=[], noTags:Union[str,Iterable[str]]=[]) -> None:
+    def __init__(self, hasTags:Iterable[str]=[], noTags:Iterable[str]=[]) -> None:
         super().__init__()
-        self.whitelist = [hasTags] if isinstance(hasTags, str) else hasTags
-        self.blacklist = [noTags] if isinstance(hasTags, str) else noTags
+        self.whitelist = hasTags
+        self.blacklist = noTags
         
     def condition(self, illust: PixivIllust) -> bool:
-        tags = set(illust["authTags"])
+        tags = set(illust.authTags+illust.userTags)
         if len(self.blacklist) == 0 or all(x not in tags for x in self.blacklist):
             return self.whitelist == 0 or all(x in tags for x in self.whitelist)
         else:
             return False
     
-_defaultFilter = [AllpassFilter()]
+_defaultFilters = [AllpassFilter()]
 
 
 # grabs
 class GrabBase(ABC):
-    """Grab 基类
-    """
     def __init__(self, db:Redis, num:int=60, expire:Optional[int]=86400, group:str="illust",        
-                 filters:Iterable[IllustFilter]=_defaultFilter) -> None:
-        """用于抓取图片
-
-        Args:
-            db: redis database
-            num (int, optional): 每次最大拉去数量. Defaults to 60.
-            expire (int, optional): 过期时间/秒. Defaults to 86400.
-            filters (Union[Iterable[IllustFilter], IllustFilter], optional): 过滤器. Defaults to allpass_filter.
-        """
+                 filters:Iterable[IllustFilter]=_defaultFilters) -> None:
         self.db = db
         self.maxNum = num
         self.group = group
@@ -84,7 +74,7 @@ class GrabBase(ABC):
     def grab(self) -> Optional[List[PixivIllust]]:
         """从源获取图片 -> 应用过滤器 -> 存入数据库
         """
-        logger.info(f"{self.__module__} starts grabbing")
+        logger.info(f"{self.__class__.__name__} starts grabbing")
         try:
             illusts = self.source()[:self.maxNum]
             logger.info(f"Source {len(illusts)} illusts")
@@ -99,7 +89,7 @@ class GrabBase(ABC):
         
         for illust in illusts:
             key = "{}:{}".format(self.group, illust.id)
-            self.db.hset(key, mapping=illust.toDict())
+            self.db.hset(key, mapping=illust.dump())
             if self.expireTime is not None:
                 self.db.expire(key, self.expireTime)
         logger.debug(f"Added {[x.id for x in illusts]}")
@@ -133,7 +123,7 @@ class PixivRecommendedGrab(PixivGrabBase):
             logger.warning("Pixiv Error, skip")
             return []
         
-        result = [PixivIllust(self.papi, illust=illust) for illust in recommended]
+        result = [PixivIllust(self.papi, pixJson=illust) for illust in recommended]
         return result
 
 class PixivFollowGrab(PixivGrabBase):
@@ -154,5 +144,5 @@ class PixivFollowGrab(PixivGrabBase):
             logger.warning("Pixiv Error, skip")
             return []
         
-        result = [PixivIllust(self.papi, illust=illust) for illust in followIllusts]
+        result = [PixivIllust(self.papi, pixJson=illust) for illust in followIllusts]
         return result
