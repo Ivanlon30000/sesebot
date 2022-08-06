@@ -5,6 +5,8 @@ from utils.basic_config import get_logger
 from traceback import format_exc
 import time
 from pixivpy3.utils import PixivError
+from pixivpy3 import AppPixivAPI
+from redis import Redis
 
 # basic
 logger = get_logger(__name__)
@@ -29,11 +31,12 @@ class AllpassFilter(FilterBase):
     pass
 
 class UniqueFilter(FilterBase):
-    def __init__(self, db) -> None:
+    def __init__(self, db:Redis, group="illust") -> None:
         self.db = db
+        self.group = group
         
     def filter(self, illusts: List[PixivIllust], **kwargs) -> List[PixivIllust]:
-        existIllust = set(x.split(':')[-1] for x in self.db.keys("illust:*"))
+        existIllust = set(x.split(':')[-1] for x in self.db.keys(f"{self.group}:*"))
         return [illust for illust in illusts if str(illust.id) not in existIllust]
 
 class TagsFilter(FilterBase):
@@ -56,9 +59,8 @@ _defaultFilter = [AllpassFilter()]
 class GrabBase(ABC):
     """Grab 基类
     """
-    def __init__(self, db, num:int=60, expire:int=86400,            
-                 filters:Union[Iterable[IllustFilter], IllustFilter]=_defaultFilter,
-                 extraFilters: Union[Iterable[IllustFilter], IllustFilter]=[]) -> None:
+    def __init__(self, db:Redis, num:int=60, expire:Optional[int]=86400, group:str="illust",        
+                 filters:Iterable[IllustFilter]=_defaultFilter) -> None:
         """用于抓取图片
 
         Args:
@@ -69,8 +71,9 @@ class GrabBase(ABC):
         """
         self.db = db
         self.maxNum = num
+        self.group = group
         self.expireTime = expire
-        self.filters = (filters if isinstance(filters, Iterable) else [filters]) + extraFilters
+        self.filters = filters
     
     @abstractmethod
     def source(self) -> List[PixivIllust]:
@@ -89,11 +92,13 @@ class GrabBase(ABC):
             logger.error(f"Grab error:\n{format_exc()}")
             return 
         
+        logger.debug(self.filters)
         for filter in self.filters:
+            logger.info(f"Apply {filter.__class__.__name__}")
             illusts = filter(illusts)
         
         for illust in illusts:
-            key = "illust:{}".format(illust.id)
+            key = "{}:{}".format(self.group, illust.id)
             self.db.hset(key, mapping=illust.toDict())
             if self.expireTime is not None:
                 self.db.expire(key, self.expireTime)
@@ -110,16 +115,15 @@ class GrabBase(ABC):
             logger.info(f"Sleep for {sleepTime}s")
             time.sleep(sleepTime)
 
+class PixivGrabBase(GrabBase):
+    def __init__(self, db: Redis, papi:AppPixivAPI, num: int = 60, expire: Optional[int] = 86400, group: str = "illust",
+                 filters: Iterable[IllustFilter] = []) -> None:
+        super().__init__(db, num=num, expire=expire, group=group, filters=[UniqueFilter(db, group)]+filters)
+        self.papi = papi
 
-class PixivRecommendedGrab(GrabBase):
+class PixivRecommendedGrab(PixivGrabBase):
     """抓取 pixiv 推荐
     """
-    def __init__(self, db, papi, num: int = 60, expire: int = 86400,
-                 filters: Union[Iterable[IllustFilter], IllustFilter] = _defaultFilter,
-                 extraFilters: Union[Iterable[IllustFilter], IllustFilter]=[]) -> None:
-        super().__init__(db, num, expire, filters, extraFilters)
-        self.papi = papi
-        
     def source(self) -> List[PixivIllust]:
         logger.info("Getting pixiv recommended ...")
         try:
@@ -130,4 +134,25 @@ class PixivRecommendedGrab(GrabBase):
             return []
         
         result = [PixivIllust(self.papi, illust=illust) for illust in recommended]
+        return result
+
+class PixivFollowGrab(PixivGrabBase):
+    """抓取关注
+    """
+    def __init__(self, db: Redis, papi: AppPixivAPI, restrict:List[str]=["public"], num:int=-1, expire: Optional[int] = 86400,
+                 filters: Iterable[IllustFilter] = []) -> None:
+        super().__init__(db, papi, num=num, expire=expire, group="follow", filters=filters)
+        self.restrict = restrict
+        
+    def source(self) -> List[PixivIllust]:
+        logger.info("Getting pixiv follow ...")
+        try:
+            followIllusts = []
+            for r in self.restrict:
+                followIllusts.extend(self.papi.illust_follow(r)["illusts"])
+        except (PixivError, KeyError):
+            logger.warning("Pixiv Error, skip")
+            return []
+        
+        result = [PixivIllust(self.papi, illust=illust) for illust in followIllusts]
         return result

@@ -6,6 +6,7 @@ from collections import UserDict
 from enum import Enum, auto
 from io import BytesIO
 from typing import *
+from pixivpy3 import AppPixivAPI
 
 
 class Rating(Enum):
@@ -32,6 +33,7 @@ class PixivIllust:
     id: int
     fp: Union[BytesIO, str]
     filesize: int
+    pageCount: int
     authTags: List[str]
     userTags: List[str]
     rating: Rating
@@ -40,7 +42,7 @@ class PixivIllust:
     size: Tuple[int, int]
     createdTime: int
 
-    def __init__(self, pixiv_agent, id: int = None, illust: Dict = None, 
+    def __init__(self, pixiv_agent:AppPixivAPI=None, id: int = None, illust: Dict = None, 
                  rawdir: str = None, size: IllustSize = IllustSize.LARGE,
                  mode: str="url") -> None:
         super().__init__()
@@ -49,6 +51,7 @@ class PixivIllust:
         if illust is not None:
             self.id = illust["id"]
         else:
+            assert self.agent is not None
             self.id = id
             illust = self.agent.illust_detail(id)
             illust = illust["illust"]
@@ -58,6 +61,7 @@ class PixivIllust:
             with open(f"{rawdir}/{self.id}.json", 'w') as fp:
                 json.dump(illust, fp, ensure_ascii=False)
         self.createdTime = int(time.time())
+        self.pageCount = illust["page_count"]
         if size == IllustSize.MEDIUM:
             url = illust["image_urls"]["medium"]
         elif size == IllustSize.LARGE:
@@ -73,6 +77,7 @@ class PixivIllust:
         self.title = illust["title"]
         self.size = (illust["width"], illust["height"])
         if mode == "download":
+            assert self.agent is not None
             self.fp = BytesIO()
             self.agent.download(url, fname=self.fp)
             self.filesize = len(self.fp.getvalue())
