@@ -35,15 +35,16 @@ schedule.every().day.at("22:30").do(daily_push, text="晚上辣！这是派蒙�
 
 
 def follow_push():
+    group="follow"
     logger.info("Start push follow")
-    feed = feed_all_interactive(db, ME, group="follow")
+    feed = feed_all_interactive(db, ME, group=group)
     num = feed.__next__()
     logger.info(f"{num} new follow")
     if  num > 0:
         bot.send_message(ME, f"有{num}张新的涩图辣！")
         for illust in feed:
             logger.info(f"Push follow illust: {illust['id']}")
-            bot_send_illust(bot, ME, illust)
+            bot_send_illust(bot, ME, illust, group=group)
 
 schedule.every(10).minutes.do(follow_push)
 

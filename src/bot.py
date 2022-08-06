@@ -6,6 +6,7 @@ import telebot
 from telebot.types import *
 from telebot.util import quick_markup
 
+from bot import bot_send_illust
 from pixiv import illust_bookmark_add
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
@@ -32,28 +33,9 @@ def sese(message: Message):
     chat_id = message.chat.id
     feed = random_feed_interactive(db, chat_id)
     if feed.__next__():
-        start = time.time()
         bot.reply_to(message, "涩图来力！")
-        end = time.time()
-        logger.info(f"Replying costs {end-start:.3f}s")
         illust = feed.__next__()
-        photo = to_photo(illust["img"])
-        caption = '\n'.join([
-            illust["title"],
-            "Pixiv: https://www.pixiv.net/artworks/{}".format(illust["id"]),
-            "Tags: {}".format(', '.join('#' + x for x in illust["authTags"].split(',')))
-        ])
-        
-        if chat_id == TOKEN["chatid_me"]:
-            markup = quick_markup({
-                'bookmark!': {'callback_data': 'like:'+illust["id"]}
-            })
-        else:
-            markup = None
-        start = time.time()
-        bot.send_photo(message.chat.id, photo=photo, caption=caption, reply_markup=markup)
-        end = time.time()
-        logger.info(f"Image sent, costs {end-start:.2f}s")
+        bot_send_illust(bot, chat_id, illust)
     else:
         logger.info("No image available.")
         bot.send_sticker(message.chat.id, "CAACAgUAAxkDAAMcYuoPdZi1WU9ph-DxAf7i9d5uIvsAAqIFAAKX3FBXvDeSjH2iYu4pBA")
@@ -61,14 +43,22 @@ def sese(message: Message):
 
 @bot.callback_query_handler(func=lambda x: re.match(r"like:\d+", x.data))
 def echo_query(query: CallbackQuery):
-    illustId = query.data.split(':')[-1]
-    logger.info(f"Bookmark query pix:{illustId}")
-    illust = db.hgetall(f"illust:{illustId}")
-    res = illust_bookmark_add(illust)
-    if res is not None:
-        bot.reply_to(query.message, f"{illustId}已收藏")
+    parts = query.data.split(':')[-1]
+    if len(parts) == 3:
+        _, group, illustId = parts
     else:
+        _, illustId = parts
+        group = "illust"
+        
+    logger.info(f"Bookmark query pix:{illustId}")
+    try:
+        illust = db.hgetall(f"{group}:{illustId}")
+        res = illust_bookmark_add(illust)
+    except:
         bot.reply_to(query.message, f"{illustId}收藏出错")
+    else:
+        bot.reply_to(query.message, f"{illustId}已收藏")
+        
 
 @bot.message_handler(func=lambda x: True)
 def echo(message: Message):
