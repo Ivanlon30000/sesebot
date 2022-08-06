@@ -1,12 +1,14 @@
-from typing import *
-from . import PixivIllust
-from abc import ABC, abstractmethod
-from utils.basic_config import get_logger
-from traceback import format_exc
 import time
-from pixivpy3.utils import PixivError
+from abc import ABC, abstractmethod
+from traceback import format_exc
+from typing import *
+
 from pixivpy3 import AppPixivAPI
+from pixivpy3.utils import PixivError
 from redis import Redis
+from utils.basic_config import get_logger
+
+from . import PixivIllust
 
 # basic
 logger = get_logger(__name__)

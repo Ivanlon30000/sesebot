@@ -1,8 +1,9 @@
 from typing import *
-from telebot.util import quick_markup
+
 from pixiv import PixivIllust
+from telebot.types import InlineKeyboardMarkup, Message
+from telebot.util import quick_markup
 from utils import TOKEN
-from telebot.types import Message, InlineKeyboardMarkup
 
 
 def bot_send_illust(bot, chatId:int, illust:PixivIllust, 

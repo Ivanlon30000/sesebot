@@ -3,10 +3,10 @@ import random
 from io import BytesIO
 from typing import *
 
+from pixiv import PixivIllust
 from redis import Redis
 
 from utils.basic_config import get_logger
-from pixiv import PixivIllust
 
 logger = get_logger(__name__)
 

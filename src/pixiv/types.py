@@ -1,7 +1,6 @@
-from ntpath import join
 from typing import *
-from pixivpy3 import AppPixivAPI
 
+from pixivpy3 import AppPixivAPI
 
 _RATING: TypeAlias = Literal["u", "g", "s", "q", "e", ""]
 _ILLUST_TYPE: TypeAlias = Literal["illust", "ugoira", ""]

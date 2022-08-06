@@ -1,4 +1,5 @@
 import json
+
 import pixivpy3
 from utils import TOKEN
 

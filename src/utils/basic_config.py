@@ -2,9 +2,10 @@ import logging
 import os
 import sys
 from typing import *
-from utils import CONFIG
+
 import redis
 
+from utils import CONFIG
 
 BASE_FMT = logging.Formatter("{asctime} - {levelname}: {message}", style="{", datefmt="%Y/%m/%d %H:%M:%S")
 MODULE_FMT = logging.Formatter("{asctime} - {levelname}: [{name}] {message}",  style="{", datefmt="%Y/%m/%d %H:%M:%S")

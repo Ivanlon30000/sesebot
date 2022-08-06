@@ -1,9 +1,9 @@
+from traceback import format_exc
 from typing import *
 
 import pixivpy3
 from pixivpy3.utils import PixivError
 from utils.basic_config import get_logger
-from traceback import format_exc, format_exc
 
 from . import API
 from .types import PixivIllust
