@@ -47,8 +47,12 @@ def follow_push():
 
 push_job = schedule.every(10).minutes.do(follow_push)
 
-logger.info(f"{len(schedule.get_jobs())} push schedule running")
-push_job.run()
-while True:
-    schedule.run_pending()
-    time.sleep(10)
+def main():
+    logger.info(f"{len(schedule.get_jobs())} push schedule running")
+    push_job.run()
+    while True:
+        schedule.run_pending()
+        time.sleep(10)
+        
+if __name__ == "__main__":
+    main()

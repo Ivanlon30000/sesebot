@@ -82,6 +82,10 @@ def seeall(query: CallbackQuery):
         logger.info(f"Reply markup modified")
     else:
         bot.send_message(f"出错力！")
+        
+@bot.message_handler(commands=["/ping"])
+def echo_chatid(message: Message):
+    bot.send_message(message.chat.id, message.chat.id)
 
 @bot.message_handler(func=lambda x: True)
 def echo(message: Message):
@@ -93,7 +97,9 @@ def echo(message: Message):
     text = f"布谷——布谷——。幽夜净土时间{text}。"
     bot.send_message(message.chat.id, text)
 
-
-if __name__ == "__main__": 
+def main():
     logger.info("Bot looping")
     bot.infinity_polling(skip_pending=True)
+
+if __name__ == "__main__": 
+    main()

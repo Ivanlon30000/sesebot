@@ -29,7 +29,12 @@ schedule.every(CONFIG["interval"]).seconds.do(recommendedGrab.grab)
 schedule.every(10).minutes.do(followGrab.grab)
 schedule.every().hour.do(refresh_token)
 
-logger.info(f"{len(schedule.get_jobs())} grab schedule running")
-while True:
-    schedule.run_pending()
-    time.sleep(10)
+
+def main():
+    logger.info(f"{len(schedule.get_jobs())} grab schedule running")
+    while True:
+        schedule.run_pending()
+        time.sleep(10)
+        
+if __name__ == "__main__":
+    main()
