@@ -1,5 +1,5 @@
 # sese bot
-
+[English README](./README_EN.md)
 
 # 部署  
 ## 环境
