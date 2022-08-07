@@ -5,7 +5,7 @@ import pixivpy3
 from pixivpy3.utils import PixivError
 from utils.basic_config import get_logger
 
-from . import API
+from . import get_agent, refresh_token
 from .types import PixivIllust
 
 logger = get_logger(__name__)
@@ -13,11 +13,11 @@ logger = get_logger(__name__)
 
 def illust_bookmark_add(illust: Union[str, int, PixivIllust, Dict[str, Any]],
                         restrict: str = "public",
-                        userTags: Optional[List[str]] = None) -> Dict[str, Any]:
+                        userTags: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
     logger.debug(f"Bookmark ({type(illust)}){illust}")
     if isinstance(illust, (str, int)):
         try:
-            illust = API.illust_detail(illust)
+            illust = get_agent().illust_detail(illust)
         except pixivpy3.PixivError:
             logger.warning(f"Bookmark failed: Pixiv Error")
             return
@@ -38,14 +38,23 @@ def illust_bookmark_add(illust: Union[str, int, PixivIllust, Dict[str, Any]],
         tags = userTags + tags
     tags = tags[:10]
     logger.info(f"Bookmark {illustId} with {len(tags)} tags")
-    res = API.illust_bookmark_add(illustId, restrict=restrict, tags=tags)
-    logger.debug(f"Respose: {res}")
+    res = get_agent().illust_bookmark_add(illustId, restrict=restrict, tags=tags)
+    logger.debug(f"Add bookmark respose: {res}")
+    if 'error' in res:
+        logger.warning(f"Add bookmark {illustId} error: {res['error']}, retry.")
+        refresh_token()
+        res = get_agent().illust_bookmark_add(illustId, restrict=restrict, tags=tags)
+        if 'error' in res:
+            logger.error(f"Add bookmark {illustId} failed")
+            return None
     return res
 
 def illust_image_urls(iid:int) -> List[str]:
     logger.info(f"Getting illust images for {iid}")
     try:
-        illust = API.illust_detail(iid)["illust"]
+        illust = get_agent().illust_detail(iid)
+        logger.debug(illust)
+        illust = illust["illust"]
     except (PixivError, KeyError):
         logger.error(f"Getting illust images for {iid} error {format_exc()}")
         return None

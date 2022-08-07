@@ -6,7 +6,7 @@ import telebot
 
 from bot import bot_send_illust
 from utils.basic_config import get_database, get_logger
-from utils.const import TOKEN
+from utils.const import TOKEN, CONFIG
 from utils.feed import feed_all_interactive, random_feed
 
 logger = get_logger("push")
@@ -45,7 +45,7 @@ def follow_push():
             logger.info(f"Push follow illust: {illust}")
             bot_send_illust(bot, ME, illust, group=group)
 
-push_job = schedule.every(10).minutes.do(follow_push)
+push_job = schedule.every(CONFIG["follow_check_interval"]).minutes.do(follow_push)
 
 def main():
     logger.info(f"{len(schedule.get_jobs())} push schedule running")

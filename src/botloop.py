@@ -1,12 +1,9 @@
 import datetime
 import re
-import time
 from typing import *
 
 import telebot
 from telebot.types import *
-from telebot.types import InputMediaPhoto
-from telebot.util import quick_markup
 
 from bot import bot_send_illust, remove_reply_markup_item
 from pixiv import illust_bookmark_add, illust_image_urls
@@ -53,10 +50,9 @@ def echo_query(query: CallbackQuery):
         group = "illust"
         
     logger.info(f"Bookmark query pix:{illustId}")
-    try:
-        illust = db.hgetall(f"{group}:{illustId}")
-        res = illust_bookmark_add(illust)
-    except:
+    illust = db.hgetall(f"{group}:{illustId}")
+    res = illust_bookmark_add(illust)
+    if res is None:
         logger.error(f"Bookmark {illustId} error")
         bot.answer_callback_query(query.id, f"{illustId} 收藏出错")
     else:
@@ -82,6 +78,7 @@ def seeall(query: CallbackQuery):
         logger.info(f"Reply markup modified")
     else:
         bot.send_message(query.message.chat.id, f"出错力！")
+    bot.answer_callback_query(query.id)
         
 @bot.message_handler(commands=["/ping"])
 def echo_chatid(message: Message):

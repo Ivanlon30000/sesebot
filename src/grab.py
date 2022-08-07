@@ -24,14 +24,15 @@ recommendedGrab = PixivRecommendedGrab(db=db, papi=PAPI, num=CONFIG["recommend_n
 
 followGrab = PixivFollowGrab(db=db, papi=PAPI)
 
-
-schedule.every(CONFIG["interval"]).seconds.do(recommendedGrab.grab)
-schedule.every(10).minutes.do(followGrab.grab)
+grabs = []
+grabs.append(schedule.every(CONFIG["interval"]).seconds.do(recommendedGrab.grab))
+grabs.append(schedule.every(CONFIG["follow_check_interval"]).minutes.do(followGrab.grab))
 schedule.every().hour.do(refresh_token)
 
 
 def main():
     logger.info(f"{len(schedule.get_jobs())} grab schedule running")
+    [g.run() for g in grabs]
     while True:
         schedule.run_pending()
         time.sleep(10)

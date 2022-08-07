@@ -20,6 +20,4 @@ Rename `config.json.example` to `config.json`. Edit it if you need.
 Rename `token.json.example` to `token.json` and then place your telegram bot token and pixiv refresh token at `pixiv`, `bot` 
 
 ## Run   
-1. Start bot: `python src/bot.py`
-2. Start grabbing from pixiv: `python src/grab.py`
-3. Start pushing: `python src/push.py`
+`python src/main.py`

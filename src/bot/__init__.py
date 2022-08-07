@@ -12,7 +12,7 @@ def bot_send_illust(bot, chatId:int, illust:PixivIllust,
     if illust.pageCount > 1:
         markup ["全部"] = {'callback_data': f"seeall:{illust.id}"}
     
-    if chatId == TOKEN['chatid_me']:
+    if str(chatId) == str(TOKEN['chatid_me']):
         markup['收藏'] = {'callback_data': f'like:{group}:{illust.id}'}
     
     if len(markup) > 0:

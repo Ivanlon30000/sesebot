@@ -19,6 +19,4 @@
 重命名 `token.json.example` 为 `token.json`, 分别在 `pixiv`, `bot` 填入 telegram bot token 和 pixiv refresh token
 
 ## 启动  
-1. 启动机器人: `python src/bot.py`
-2. 启动抓取图片: `python src/grab.py`
-3. 启动推送图片: `python src/push.py`
+`python src/main.py`

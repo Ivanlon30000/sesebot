@@ -15,7 +15,8 @@ def get_agent() -> pixivpy3.AppPixivAPI:
 
 def refresh_token() -> None:
     logger.info("Refresh token")
-    API.auth(refresh_token=TOKEN["pixiv"])
+    res = API.auth(refresh_token=TOKEN["pixiv"])
+    logger.debug(res)
 
 # imports
 from .aapi import *
