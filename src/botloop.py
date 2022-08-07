@@ -4,12 +4,13 @@ from typing import *
 
 import telebot
 from telebot.types import *
+from telebot.util import quick_markup
 
 from bot import bot_send_illust, remove_reply_markup_item
 from pixiv import illust_bookmark_add, illust_image_urls
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
-from utils.feed import random_feed_interactive
+from utils.feed import random_feed_interactive, query_all_illusts_id
 
 logger = get_logger("bot")
 
@@ -65,7 +66,7 @@ def echo_query(query: CallbackQuery):
     
 
 @bot.callback_query_handler(func=lambda x: re.match(r"seeall:\d+", x.data))
-def seeall(query: CallbackQuery):
+def seeall_query(query: CallbackQuery):
     logger.debug(f"seeall query: {query}")
     _, iid = query.data.split(":")
     urls = illust_image_urls(iid)
@@ -80,10 +81,39 @@ def seeall(query: CallbackQuery):
         bot.send_message(query.message.chat.id, f"出错力！")
     bot.answer_callback_query(query.id)
         
-@bot.message_handler(commands=["/ping"])
+        
+@bot.message_handler(commands=["ping"])
 def echo_chatid(message: Message):
     bot.send_message(message.chat.id, message.chat.id)
+    
+    
+@bot.message_handler(commands=["level"])
+def set_sanity_level_message(message: Message):
+    level = db.hget("sanityLevel", message.chat.id)
+    if not level:
+        level = "未设置"
+    bot.send_message(message.chat.id, 
+                     f"当前过滤等级：{level}\n设置新的过滤等级：\n(只推送小于或等于指定等级以下的涩图)", 
+                     reply_markup=quick_markup({
+                        "2": {"callback_data": "setlevel:2"},
+                        "4": {"callback_data": "setlevel:4"},
+                        "6": {"callback_data": "setlevel:6"}}, row_width=3))
 
+
+@bot.callback_query_handler(func=lambda x:re.match(r"setlevel:\d+", x.data))
+def set_sanity_level_query(query: CallbackQuery):
+    sanityLevel = query.data.split(":")[-1]
+    db.hset("sanityLevel", query.message.chat.id, sanityLevel)
+    bot.reply_to(query.message, f"过滤等级已设为 {sanityLevel}")
+    bot.answer_callback_query(query.id)
+
+
+@bot.message_handler(commands=["quota"])
+def echo_quota(message: Message):
+    quota = query_all_illusts_id(db, message.chat.id, "illust")
+    bot.send_message(message.chat.id, f"宁有 {len(quota)} 张涩图库存")    
+    
+    
 @bot.message_handler(func=lambda x: True)
 def echo(message: Message):
     time = datetime.datetime.now()
@@ -94,9 +124,11 @@ def echo(message: Message):
     text = f"布谷——布谷——。幽夜净土时间{text}。"
     bot.send_message(message.chat.id, text)
 
+
 def main():
     logger.info("Bot looping")
     bot.infinity_polling(skip_pending=True)
+
 
 if __name__ == "__main__": 
     main()

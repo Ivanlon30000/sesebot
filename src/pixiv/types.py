@@ -18,7 +18,8 @@ class PixivIllust:
     title: str
     author: str
     authorId: int
-    _INT_ATTR = ["id", "pageCount", "authorId"]
+    sanityLevel: int
+    _INT_ATTR = ["id", "pageCount", "authorId", "sanityLevel"]
     _STRING_ATTR = ["url", "rating", "type", "title", "author"]
     _LIST_ATTR = ["authTags", "userTags"]
 
@@ -40,6 +41,7 @@ class PixivIllust:
             self.title = pixJson["title"]
             self.author = pixJson["user"]["name"]
             self.authorId = pixJson["user"]["id"]
+            self.sanityLevel = pixJson["sanity_level"]
             url = pixJson["image_urls"]["large"]
             self.url = url.replace("i.pximg.net", "i.pixiv.cat")
 

@@ -24,7 +24,8 @@ def bot_send_illust(bot, chatId:int, illust:PixivIllust,
         illust.title + (f"({illust.pageCount} pages)" if illust.pageCount > 1 else ""),
         "Pixiv: https://www.pixiv.net/artworks/{}".format(illust.id),
         "Artist: {}".format(illust.author),
-        "Tags: {}".format(', '.join('#' + x for x in illust.authTags))
+        "Tags: {}".format(', '.join('#' + x for x in illust.authTags)),
+        "Level: {}".format(illust.sanityLevel)
     ]
 
     bot.send_photo(chatId, illust.url, caption='\n'.join(lines), reply_markup=markup, reply_to_message_id=reply_to)

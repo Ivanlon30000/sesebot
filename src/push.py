@@ -48,7 +48,7 @@ def follow_push():
 push_job = schedule.every(CONFIG["follow_check_interval"]).minutes.do(follow_push)
 
 def main():
-    logger.info(f"{len(schedule.get_jobs())} push schedule running")
+    logger.info(f"{len(schedule.get_jobs())} schedule running")
     push_job.run()
     while True:
         schedule.run_pending()

@@ -22,7 +22,7 @@ except PixivError:
 recommendedGrab = PixivRecommendedGrab(db=db, papi=PAPI, num=CONFIG["recommend_num"],
                                        expire=CONFIG["expire"], filters=[TagsFilter(noTags=["R-18"])])
 
-followGrab = PixivFollowGrab(db=db, papi=PAPI)
+followGrab = PixivFollowGrab(db=db, papi=PAPI, expire=CONFIG["expire"])
 
 grabs = []
 grabs.append(schedule.every(CONFIG["interval"]).seconds.do(recommendedGrab.grab))
@@ -31,7 +31,7 @@ schedule.every().hour.do(refresh_token)
 
 
 def main():
-    logger.info(f"{len(schedule.get_jobs())} grab schedule running")
+    logger.info(f"{len(schedule.get_jobs())} schedule running")
     [g.run() for g in grabs]
     while True:
         schedule.run_pending()
