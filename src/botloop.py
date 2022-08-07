@@ -21,10 +21,21 @@ logger.info("Redis db connected")
 
 bot = telebot.TeleBot(TOKEN["bot"])
 
-@bot.message_handler(commands=["start", "help"])
+
+@bot.message_handler(commands=["start"])
 def start(message: Message):
-    bot.reply_to(message, "说，你想涩涩")
-    
+    bot.send_message(message.chat.id, "说，你想涩涩")
+
+
+@bot.message_handler(commands=["help"])
+def echo_help(message: Message):
+    text = """/start - 开始
+/help - 帮助
+/ping - 返回你的chat id
+/level - 设置过滤等级
+/quota - 查看涩图库存"""
+    bot.send_message(message.chat.id, text)
+
 
 @bot.message_handler(regexp=r"(se|色|涩){2}|(se|色|涩)(图|tu)|不够[涩色]")
 def sese(message: Message):
@@ -110,7 +121,7 @@ def set_sanity_level_query(query: CallbackQuery):
 
 @bot.message_handler(commands=["quota"])
 def echo_quota(message: Message):
-    quota = query_all_illusts_id(db, message.chat.id, "illust")
+    quota = query_all_illusts_id(db, message.chat.id, "illust", applySanity=True)
     bot.send_message(message.chat.id, f"宁有 {len(quota)} 张涩图库存")    
     
     
