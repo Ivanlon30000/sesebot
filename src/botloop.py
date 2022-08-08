@@ -120,8 +120,8 @@ def set_sanity_level_message(message: Message):
         text = f"当前过滤等级：{level}\n设置新的过滤等级：\n(只推送小于或等于指定等级以下的涩图)"
         markup = quick_markup({
             "2": {"callback_data": "setlevel:2"},
-            "4": {"callback_data": "setlevel:4"},
-            "6": {"callback_data": "setlevel:6"}}, row_width=3)
+            "≦4": {"callback_data": "setlevel:4"},
+            "≦6": {"callback_data": "setlevel:6"}}, row_width=3)
         
     bot.send_message(message.chat.id, text, 
                      reply_markup=markup)
