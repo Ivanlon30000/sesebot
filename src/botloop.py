@@ -10,7 +10,7 @@ from bot import bot_send_illust, remove_reply_markup_item
 from pixiv import illust_bookmark_add, illust_image_urls
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
-from utils.feed import random_feed_interactive, query_all_illusts_id
+from utils.feed import random_feed_interactive, query_all_illusts_id, set_sanity_level
 
 logger = get_logger("bot")
 
@@ -32,7 +32,7 @@ def echo_help(message: Message):
     text = """/start - 开始
 /help - 帮助
 /ping - 返回你的chat id
-/level - 设置过滤等级
+/level - 设置过滤等级, e.g. "/level 2-4" or "/level 4,6"
 /quota - 查看涩图库存"""
     bot.send_message(message.chat.id, text)
 
@@ -98,24 +98,45 @@ def echo_chatid(message: Message):
     bot.send_message(message.chat.id, message.chat.id)
     
     
-@bot.message_handler(commands=["level"])
+@bot.message_handler(func=lambda x: re.match(r"/level ?(.*)$", x.text))
 def set_sanity_level_message(message: Message):
+    logger.info(f"Sanity level message received: {message.text}")
     level = db.hget("sanityLevel", message.chat.id)
     if not level:
         level = "未设置"
-    bot.send_message(message.chat.id, 
-                     f"当前过滤等级：{level}\n设置新的过滤等级：\n(只推送小于或等于指定等级以下的涩图)", 
-                     reply_markup=quick_markup({
-                        "2": {"callback_data": "setlevel:2"},
-                        "4": {"callback_data": "setlevel:4"},
-                        "6": {"callback_data": "setlevel:6"}}, row_width=3))
+    
+    mat = re.match(r"/level ?(\d(,\d)*|\d?-\d?)$", message.text)
+    if mat:
+        expr = mat.group(1)
+        newLevel = set_sanity_level(db, message.chat.id, expr)
+        logger.info(f"Old level: {level}, new level: {newLevel}")
+        
+        if newLevel:
+            text = f"过滤器已设为 {newLevel}"
+        else:
+            text = "过滤器表达式错误，支持的表达式：\n1. ','分割: 2,4,6\n2. '-'分割: 2-6"
+        markup = None
+    else:
+        text = f"当前过滤等级：{level}\n设置新的过滤等级：\n(只推送小于或等于指定等级以下的涩图)"
+        markup = quick_markup({
+            "2": {"callback_data": "setlevel:2"},
+            "4": {"callback_data": "setlevel:4"},
+            "6": {"callback_data": "setlevel:6"}}, row_width=3)
+        
+    bot.send_message(message.chat.id, text, 
+                     reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda x:re.match(r"setlevel:\d+", x.data))
 def set_sanity_level_query(query: CallbackQuery):
     sanityLevel = query.data.split(":")[-1]
-    db.hset("sanityLevel", query.message.chat.id, sanityLevel)
-    bot.reply_to(query.message, f"过滤等级已设为 {sanityLevel}")
+    logger.info(f"Sanity level query received: {query.data}")
+    newLevel = set_sanity_level(db, query.message.chat.id, '-'+sanityLevel)
+    if newLevel:
+        bot.reply_to(query.message, f"过滤等级已设为 {newLevel}")
+        logger.info(f"Sanity level set to {newLevel}")
+    else:
+        logger.inf(f"Failed to set sanity level to {sanityLevel}")
     bot.answer_callback_query(query.id)
 
 

@@ -20,7 +20,9 @@ except PixivError:
 
 
 recommendedGrab = PixivRecommendedGrab(db=db, papi=PAPI, num=CONFIG["recommend_num"],
-                                       expire=CONFIG["expire"], filters=[TagsFilter(noTags=["R-18"])])
+                                       expire=CONFIG["expire"], filters=[
+                                           TagsFilter(noTags=["R-18", "3D", "3DCG"]),
+                                           ])
 
 followGrab = PixivFollowGrab(db=db, papi=PAPI, expire=CONFIG["expire"])
 
