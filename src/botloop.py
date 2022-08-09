@@ -6,7 +6,7 @@ import telebot
 from telebot.types import *
 from telebot.util import quick_markup
 
-from bot import bot_send_illust, remove_reply_markup_item
+from bot import bot_send_illust, remove_message_reply_markup_item
 from pixiv import illust_bookmark_add, illust_image_urls
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
@@ -73,7 +73,7 @@ def echo_query(query: CallbackQuery):
         
         bot.answer_callback_query(query.id)
         bot.reply_to(query.message, f"{illustId} 已收藏")
-        remove_reply_markup_item(bot, query.message, "收藏")
+        remove_message_reply_markup_item(bot, query.message, "收藏")
         logger.info(f"Reply markup modified")
     
 
@@ -87,7 +87,7 @@ def seeall_query(query: CallbackQuery):
         media = [InputMediaPhoto(url) for url in urls]
         bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id)
         logger.info(f"{len(urls)} images sent")
-        remove_reply_markup_item(bot, query.message, "全部")
+        remove_message_reply_markup_item(bot, query.message, "全部")
         logger.info(f"Reply markup modified")
     else:
         bot.send_message(query.message.chat.id, f"出错力！")
