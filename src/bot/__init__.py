@@ -1,7 +1,7 @@
 from typing import *
 
 from pixiv import PixivIllust
-from telebot.types import InlineKeyboardMarkup, Message
+from telebot import types
 from telebot.util import quick_markup
 from utils import TOKEN
 
@@ -29,11 +29,14 @@ def bot_send_illust(bot, chatId:int, illust:PixivIllust,
     ]
 
     bot.send_photo(chatId, illust.url, caption='\n'.join(lines), reply_markup=markup, reply_to_message_id=reply_to)
-    
-def remove_reply_markup_item(bot, message:Message, markup_item:str) -> None:
-    markup = message.reply_markup.to_dict()
+
+def remove_reply_markup_item(markup:types.InlineKeyboardMarkup) -> types.InlineKeyboardMarkup:
     newMarkup = {
         inline["text"]: {"callback_data": inline["callback_data"]} for inline in markup["inline_keyboard"][0] if inline["text"] != markup_item
     }
     newMarkup = quick_markup(newMarkup)
+
+def remove_message_reply_markup_item(bot, message:types.Message, markup_item:str) -> None:
+    markup = message.reply_markup.to_dict()
+    newMarkup = remove_reply_markup_item(markup)
     bot.edit_message_reply_markup(message.chat.id, message.id, reply_markup=newMarkup)
