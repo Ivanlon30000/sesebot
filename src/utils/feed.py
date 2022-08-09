@@ -12,7 +12,11 @@ logger = get_logger(__name__)
 def query_all_illusts_id(db:Redis, chatid:int, group:str, applySanity:bool) -> List[str]:
     imglist = [x.split(':')[-1] for x in db.keys(f"{group}:*")]
     userSeen = db.smembers(f"user_seen:{chatid}")
-    userLevel = db.hget("sanityLevel", chatid).split(",")
+    userLevel = db.hget("sanityLevel", chatid)
+    if userLevel:
+        userLevel = userLevel.split(',')
+    else:
+        userLevel = ['2', '4', '6']
     logger.info(f"user {chatid} level: {userLevel}")
     result = []
     for illustId in imglist:
@@ -24,7 +28,7 @@ def query_all_illusts_id(db:Redis, chatid:int, group:str, applySanity:bool) -> L
             # logger.debug(f"Illust {illustId} sanity level: {illustLevel}")
             if not illustLevel:
                 continue
-            if userLevel and illustLevel not in userLevel:
+            if illustLevel not in userLevel:
                 continue
         
         result.append(illustId)

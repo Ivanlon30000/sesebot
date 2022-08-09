@@ -52,6 +52,7 @@ def sese(message: Message):
         bot.send_message(message.chat.id, "还要涩涩？还要涩涩？还要涩涩？")
 
 
+
 @bot.callback_query_handler(func=lambda x: re.match(r"like:\w+:\d+", x.data))
 def echo_query(query: CallbackQuery):
     parts = query.data.split(':')
