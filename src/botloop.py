@@ -120,9 +120,9 @@ def set_sanity_level_message(message: Message):
     else:
         text = f"当前过滤等级：{level}\n设置新的过滤等级：\n(只推送小于或等于指定等级以下的涩图)"
         markup = quick_markup({
-            "2": {"callback_data": "setlevel:2"},
-            "≦4": {"callback_data": "setlevel:4"},
-            "≦6": {"callback_data": "setlevel:6"}}, row_width=3)
+            "≦2": {"callback_data": "setlevel:0-2"},
+            "≦4": {"callback_data": "setlevel:0-4"},
+            "≦6": {"callback_data": "setlevel:0-6"}}, row_width=3)
         
     bot.send_message(message.chat.id, text, 
                      reply_markup=markup)
@@ -132,7 +132,7 @@ def set_sanity_level_message(message: Message):
 def set_sanity_level_query(query: CallbackQuery):
     sanityLevel = query.data.split(":")[-1]
     logger.info(f"Sanity level query received: {query.data}")
-    newLevel = set_sanity_level(db, query.message.chat.id, '-'+sanityLevel)
+    newLevel = set_sanity_level(db, query.message.chat.id, sanityLevel)
     if newLevel:
         bot.reply_to(query.message, f"过滤等级已设为 {newLevel}")
         logger.info(f"Sanity level set to {newLevel}")

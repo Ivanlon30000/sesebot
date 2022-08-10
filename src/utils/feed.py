@@ -16,7 +16,7 @@ def query_all_illusts_id(db:Redis, chatid:int, group:str, applySanity:bool) -> L
     if userLevel:
         userLevel = userLevel.split(',')
     else:
-        userLevel = ['2', '4', '6']
+        userLevel = ['0', '2', '4', '6']
     logger.info(f"user {chatid} level: {userLevel}")
     result = []
     for illustId in imglist:
@@ -89,7 +89,7 @@ def set_sanity_level(db:Redis, chatid:int, sanityLevel:str|List[str|int]) -> str
             expr = mat.group(1)
             if '-' in expr:
                 s, e = expr.split('-')
-                s = int(s) if s else 2
+                s = int(s) if s else 0
                 e = int(e) if e else 6
                 newLevel = (str(x) for x in range(s, e+1, 2))
             else:
@@ -100,7 +100,7 @@ def set_sanity_level(db:Redis, chatid:int, sanityLevel:str|List[str|int]) -> str
         newLevel = {str(sanityLevel)}
     else:
         raise ValueError(f"Param 'sanityLevel' type error")
-    newLevel = ','.join(x for x in set(x for x in newLevel if x in {'2', '4', '6'}))
+    newLevel = ','.join(x for x in set(x for x in newLevel if x in {'0', '2', '4', '6'}))
     if newLevel:
         db.hset("sanityLevel", chatid, newLevel)
     return newLevel
