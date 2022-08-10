@@ -35,6 +35,7 @@ def remove_reply_markup_item(markup:types.InlineKeyboardMarkup, markup_item:str)
         inline["text"]: {"callback_data": inline["callback_data"]} for inline in markup["inline_keyboard"][0] if inline["text"] != markup_item
     }
     newMarkup = quick_markup(newMarkup)
+    return newMarkup
 
 def remove_message_reply_markup_item(bot, message:types.Message, markup_item:str) -> None:
     markup = message.reply_markup.to_dict()
