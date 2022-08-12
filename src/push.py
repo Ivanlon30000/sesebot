@@ -4,7 +4,7 @@ from typing import *
 import schedule
 import telebot
 
-from bot import bot_send_illust
+from bot import send_illust
 from utils.basic_config import get_database, get_logger
 from utils.const import TOKEN, CONFIG
 from utils.feed import feed_all_interactive, random_feed
@@ -24,7 +24,7 @@ def daily_push(text:str):
             if illust is not None:
                 logger.info(f"Push {illust.id} to {chatId}, text: {text}")
                 bot.send_message(chatId, text)
-                bot_send_illust(bot, chatId, illust)
+                send_illust(bot, chatId, illust)
             else:
                 pass
 
@@ -43,7 +43,7 @@ def follow_push():
         bot.send_message(ME, f"有{num}张新的涩图辣！")
         for illust in feed:
             logger.info(f"Push follow illust: {illust}")
-            bot_send_illust(bot, ME, illust, group=group)
+            send_illust(bot, ME, illust, group=group)
 
 push_job = schedule.every(CONFIG["follow_check_interval"]).minutes.do(follow_push)
 

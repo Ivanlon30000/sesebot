@@ -7,7 +7,11 @@ from redis import Redis
 
 from utils.basic_config import get_logger
 
+
+
 logger = get_logger(__name__)
+
+
 
 def query_all_illusts_id(db:Redis, chatid:int, group:str, applySanity:bool) -> List[str]:
     imglist = [x.split(':')[-1] for x in db.keys(f"{group}:*")]

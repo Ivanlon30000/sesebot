@@ -2,8 +2,7 @@ import logging
 import os
 import sys
 from typing import *
-
-import redis
+import os
 
 from utils import CONFIG
 
@@ -13,7 +12,9 @@ MODULE_FMT = logging.Formatter("{asctime} - {levelname}: [{name}] {message}",  s
 def get_config() -> Dict[str, Any]:
     return CONFIG
 
-def get_logger(name: str, fileLogLevel=logging.DEBUG, streamLogLevel=logging.INFO) -> logging.Logger:
+def get_logger(name: str, 
+               fileLogLevel=os.environ.get("fll", logging.DEBUG), 
+               streamLogLevel=os.environ.get("sll", logging.INFO)) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
@@ -34,14 +35,3 @@ def get_logger(name: str, fileLogLevel=logging.DEBUG, streamLogLevel=logging.INF
     logger.addHandler(hdlrAll)
     
     return logger
-
-
-def get_database() -> Tuple[redis.client.Redis, Mapping[str, Any]]:
-    # database
-    REDIS_HOST = CONFIG["db_host"]
-    REDIS_PORT = CONFIG["db_port"]
-    # logger.info(f"Connecting redis {REDIS_HOST}:{REDIS_PORT}")
-    db = redis.Redis(REDIS_HOST, port=REDIS_PORT, decode_responses=True)
-    dbinfo = db.info()
-    return db, dbinfo
-    # logger.info("Redis db connected: {}".format(','.join([f"{k}:{v}" for k, v in dbinfo.items()])))
