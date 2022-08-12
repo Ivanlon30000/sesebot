@@ -14,7 +14,7 @@ def sese(message: Message):
     if feed.__next__():
         bot.reply_to(message, "涩图来力！")
         illust = feed.__next__()
-        send_illust(bot, message.chat.id, illust)
+        send_illust(message.chat.id, illust)
     else:
         logger.info("No image available.")
         bot.send_sticker(message.chat.id, "CAACAgUAAxkDAAMcYuoPdZi1WU9ph-DxAf7i9d5uIvsAAqIFAAKX3FBXvDeSjH2iYu4pBA")

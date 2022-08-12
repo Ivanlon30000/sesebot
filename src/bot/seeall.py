@@ -19,7 +19,7 @@ def seeall_query(query: CallbackQuery):
         media = [InputMediaPhoto(url) for url in urls]
         bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id)
         logger.info(f"{len(urls)} images sent")
-        remove_message_reply_markup_item(bot, query.message, "全部")
+        remove_message_reply_markup_item(query.message, "全部")
         logger.info(f"Reply markup modified")
     else:
         bot.send_message(query.message.chat.id, f"出错力！")

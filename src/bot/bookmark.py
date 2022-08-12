@@ -33,6 +33,6 @@ def echo_query(query: CallbackQuery):
         
         bot.answer_callback_query(query.id)
         bot.reply_to(query.message, f"{illustId} 已收藏")
-        remove_message_reply_markup_item(bot, query.message, "收藏")
+        remove_message_reply_markup_item(query.message, "收藏")
         logger.info(f"Reply markup modified")
     

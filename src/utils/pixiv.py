@@ -1,5 +1,3 @@
-from enum import Enum
-import logging
 import os
 from traceback import format_exc
 from typing import *
@@ -63,7 +61,7 @@ class _PAPI:
         else:
             return attri
 
-API: pixivpy3.AppPixivAPI = _PAPI() if os.environ.get("DEVELOP", False) else _papi
+API: pixivpy3.AppPixivAPI = _PAPI()
 
 
 # functions

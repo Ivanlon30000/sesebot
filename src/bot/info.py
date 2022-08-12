@@ -5,7 +5,6 @@ from . import bot, logger
 import re
 from telebot.types import Message, CallbackQuery
 import utils.db
-import utils.pixiv
 from telebot.util import quick_markup
 
     
@@ -38,7 +37,6 @@ def set_sanity_level_message(message: Message):
     bot.send_message(message.chat.id, text, 
                      reply_markup=markup)
 
-
 @bot.callback_query_handler(func=lambda x:re.match(r"setlevel:\d+", x.data))
 def set_sanity_level_query(query: CallbackQuery):
     sanityLevel = query.data.split(":")[-1]
@@ -51,3 +49,9 @@ def set_sanity_level_query(query: CallbackQuery):
     else:
         logger.inf(f"Failed to set sanity level to {sanityLevel}")
     bot.answer_callback_query(query.id)
+
+
+@bot.message_handler(commands=["quota"])
+def echo_quota(message: Message):
+    quota = utils.db.query_all_illusts_id(message.chat.id, "illust", applySanity=True)
+    bot.send_message(message.chat.id, f"宁有 {len(quota)} 张涩图库存")    
