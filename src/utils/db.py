@@ -109,11 +109,11 @@ def set_sanity_level(chatId:int | str, expr:List[int|str]|str) -> List[str]:
 
 
 # TODO: 格式化sanity level
-def query_all_illusts_key(chatId:int, region:str, applySanity:bool) -> List[str]:
+def query_all_illusts_key(chatId:int|None, region:str, applySanity:bool|None) -> List[str]:
     """查询所有图片的key (e.g. pixiv:1234567)
 
     Args:
-        chatId (int):  
+        chatId (int|None):  
         region (str): 
         applySanity (bool): 是否应用sanity过滤.
 
@@ -121,6 +121,9 @@ def query_all_illusts_key(chatId:int, region:str, applySanity:bool) -> List[str]
         List[str]: 
     """
     illustKeys = [x[x.index(':')+1:] for x in db.keys(f"illust:{region}:*")]
+    logger.info(f"{len(illustKeys)} illusts exist")
+    if chatId is None:
+        return illustKeys
     userSeen = db.smembers(f"user_seen:{chatId}")
     userLevel = db.hget("sanityLevel", chatId)
     if userLevel:
@@ -230,3 +233,6 @@ def random_feed(chatid:int, region:str="*", applySanity:bool=True) -> Optional[I
     else:
         return None
 
+
+def add_illust(illust:Illust) -> int | None:
+    return db.hset(f"illust:{illust.region}:{illust.id}", mapping=illust.dump())

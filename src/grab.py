@@ -5,7 +5,7 @@ import schedule
 from pixivpy3 import PixivError
 
 from pixiv import get_agent, refresh_token
-from pixiv.grab import PixivFollowGrab, PixivRecommendedGrab, TagsFilter
+from grabbers.base import PixivFollowGrab, PixivRecommendedGrab, TagsFilter
 from utils.basic_config import get_database, get_logger
 from utils.const import CONFIG, TOKEN
 

@@ -25,7 +25,7 @@ class Illust(ABC):
     sanityLevel: SanityLevel
     home: str
     region = "unknown"
-    _INT_ATTR = {"id", "pageCount", "sanityLevel"}
+    _INT_ATTR = {"id", "pageCount"}
     _STRING_ATTR = {"url", "type", "title", "author", "authorId"}
     _LIST_ATTR = {"authTags", "userTags"}
     
@@ -39,15 +39,17 @@ class Illust(ABC):
             self.__setattr__(key, int(dbDict[key]))
         for key in self._LIST_ATTR:
             self.__setattr__(key, dbDict[key].split(','))
+        self.sanityLevel = SanityLevel(int(dbDict["sanityLevel"]))
     
-    def dump(self) -> Dict[str, str]:
+    def dump(self) -> Dict[str, str|int]:
         data = {}
         for key in self._STRING_ATTR:
             data[key] = self.__getattribute__(key)
         for key in self._INT_ATTR:
-            data[key] = str(self.__getattribute__(key))
+            data[key] = self.__getattribute__(key)
         for key in self._LIST_ATTR:
             data[key] = ','.join(self.__getattribute__(key))
+        data["sanityLevel"] = self.sanityLevel.value
         return data
     
     @classmethod
