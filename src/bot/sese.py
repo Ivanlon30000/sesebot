@@ -1,7 +1,6 @@
 from typing import *
 
 from telebot.types import Message
-
 from utils import db
 
 from . import bot, logger

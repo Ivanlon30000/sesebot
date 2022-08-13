@@ -1,46 +1,45 @@
 from typing import *
 
 import telebot
-from pixiv import PixivIllust
+# from pixiv import PixivIllust
+from utils.types import Illust
 from telebot import types
 from telebot.util import quick_markup
-from . import bot
+from . import bot, logger
 
 from utils import TOKEN
 
 
-def send_illust(chatId:int, illust:PixivIllust, 
-                group:str="illust", reply_to:Optional[int]=None):
-    markup = {}
+def send_illust(chatId:int, illust:Illust, reply_to:Optional[int]=None):
+    markup = types.InlineKeyboardMarkup()
+    btnHome = types.InlineKeyboardButton(text="主页", url=illust.home)
+    
     if illust.pageCount > 1:
-        markup ["全部"] = {'callback_data': f"seeall:{illust.id}"}
+        btnSeeall = types.InlineKeyboardButton(text="全部", callback_data=f"seeall:{illust.region}:{illust.id}")
+        markup.row(btnHome, btnSeeall)
+    else:
+        markup.row(btnHome)
     
     if str(chatId) == str(TOKEN['chatid_me']):
-        markup['收藏'] = {'callback_data': f'like:{group}:{illust.id}'}
-    
-    if len(markup) > 0:
-        markup = quick_markup(markup)
-    else:
-        markup = None
+        btnBookmark = types.InlineKeyboardButton(text="收藏", callback_data=f'like:{illust.region}:{illust.id}')
+        markup.row(btnBookmark)
 
     lines = [
-        illust.title + (f"({illust.pageCount} pages)" if illust.pageCount > 1 else ""),
-        "Pixiv: https://www.pixiv.net/artworks/{}".format(illust.id),
+        f"{illust.title}" + (f"({illust.pageCount} pages)" if illust.pageCount > 1 else ""),
         "Artist: {}".format(illust.author),
         "Tags: {}".format(', '.join('#' + x for x in illust.authTags)),
-        "Level: {}".format(illust.sanityLevel)
+        "Level: {}".format(int(illust.sanityLevel))
     ]
 
-    bot.send_photo(chatId, illust.url, caption='\n'.join(lines), reply_markup=markup, reply_to_message_id=reply_to)
+    bot.send_photo(chatId, illust.url, caption='\n'.join(lines), 
+                   reply_markup=markup, reply_to_message_id=reply_to)
 
-def remove_reply_markup_item(markup:types.InlineKeyboardMarkup, markup_item:str) -> types.InlineKeyboardMarkup:
-    newMarkup = {
-        inline["text"]: {"callback_data": inline["callback_data"]} for inline in markup["inline_keyboard"][0] if inline["text"] != markup_item
-    }
-    newMarkup = quick_markup(newMarkup)
-    return newMarkup
 
 def remove_message_reply_markup_item(message:types.Message, markup_item:str) -> None:
     markup = message.reply_markup.to_dict()
-    newMarkup = remove_reply_markup_item(markup, markup_item)
+    #newMarkup = remove_reply_markup_item(markup, markup_item)
+    newMarkup = types.InlineKeyboardMarkup()
+    for line in markup["inline_keyboard"]:
+        newMarkup.row(*(types.InlineKeyboardButton.de_json(x) for x in line if x["text"] != markup_item))
+
     bot.edit_message_reply_markup(message.chat.id, message.id, reply_markup=newMarkup)

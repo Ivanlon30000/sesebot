@@ -1,5 +1,6 @@
 from typing import *
 from enum import Enum
+from abc import ABC, abstractmethod, abstractproperty
 
 # types
 class SanityLevel(Enum):
@@ -9,26 +10,24 @@ class SanityLevel(Enum):
     QUESTIONALBE = q = 6
     EXPLICIT = e = 8
     
-_ILLUST_TYPE: TypeAlias = Literal["illust", "ugoira", "video"]
+ILLUST_TYPE: TypeAlias = Literal["illust", "ugoira", "video"]
 
-class Illust:
+class Illust(ABC):
     id: int
     url: str
     pageCount: int
     authTags: List[str]
     userTags: List[str]
-    type: _ILLUST_TYPE
+    type: ILLUST_TYPE
     title: str
     author: str
     authorId: str
     sanityLevel: SanityLevel
-    region: str
-    
-    def __init__(self) -> None:
-        self._INT_ATTR = {"id", "pageCount", "sanityLevel"}
-        self._STRING_ATTR = {"url", "type", "title", "author", "region", "authorId"}
-        self._LIST_ATTR = {"authTags", "userTags"}
-        self.region = "unknown"
+    home: str
+    region = "unknown"
+    _INT_ATTR = {"id", "pageCount", "sanityLevel"}
+    _STRING_ATTR = {"url", "type", "title", "author", "authorId"}
+    _LIST_ATTR = {"authTags", "userTags"}
     
     def __repr__(self) -> str:
         return f"<Illust: {self.id}, region: {self.region}, title: {self.title}>"
@@ -57,35 +56,20 @@ class Illust:
         self.load(dbDict)
         return self
     
-    @classmethod
-    def from_pixiv(cls, pixJson: Dict[str, Any], 
-                 reverseProxy:str="i.pixiv.cat") -> None:
-        """
+    @abstractmethod
+    def add_bookmark(self, **kwargs) -> bool:
+        """添加到收藏
 
-        Args:
-            pixJson (Dict[str, Any], optional): 从 illust_detail(.) 生成. Defaults to None.
-            dbDict (Dict[str, str], optional): 从数据库生成. Defaults to None.
-        """
-        self = cls()
-        self.region = "pixiv"
-        if "illust" in pixJson:
-            pixJson = pixJson["illust"]
-        self.id = pixJson["id"]
-        self.pageCount = pixJson["page_count"]
-        self.title = pixJson["title"]
-        self.author = pixJson["user"]["name"]
-        self.authorId = pixJson["user"]["id"]
-        if pixJson["x_restrict"] == 1:
-            self.sanityLevel = SanityLevel.e
-        else:
-            self.sanityLevel = SanityLevel(pixJson["sanity_level"])
-        url = pixJson["image_urls"]["large"]
-        if reverseProxy:
-            self.url = url.replace("i.pximg.net", reverseProxy)
+        Returns:
+            bool: 操作是否成功
+        """ 
+        pass
+    
+    @abstractmethod
+    def illust_image_urls(self, **kwargs) -> List[str]:
+        """获取illust包含的所有图片的链接
 
-        self.authTags = [x["name"] for x in pixJson["tags"]]
-        # TODO: user tag
-        self.userTags = []
-        # TODO: ugoira
-        self.type = pixJson["type"]
-        return self
+        Returns:
+            List[str]: 
+        """
+        pass

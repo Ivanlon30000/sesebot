@@ -1,13 +1,13 @@
+import re
 from typing import *
+
+import utils.db
+from telebot.types import CallbackQuery, Message
+from telebot.util import quick_markup
 
 from . import bot, logger
 
-import re
-from telebot.types import Message, CallbackQuery
-import utils.db
-from telebot.util import quick_markup
 
-    
 @bot.message_handler(func=lambda x: re.match(r"/level ?(.*)$", x.text))
 def set_sanity_level_message(message: Message):
     logger.info(f"Set sanity level {message.text}")
@@ -53,5 +53,5 @@ def set_sanity_level_query(query: CallbackQuery):
 
 @bot.message_handler(commands=["quota"])
 def echo_quota(message: Message):
-    quota = utils.db.query_all_illusts_id(message.chat.id, "illust", applySanity=True)
+    quota = utils.db.query_all_illusts_key(message.chat.id, "illust", applySanity=True)
     bot.send_message(message.chat.id, f"宁有 {len(quota)} 张涩图库存")    

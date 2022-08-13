@@ -1,21 +1,22 @@
+import pickle
 import re
 from typing import *
 
-from telebot.types import CallbackQuery, InputMediaPhoto
 
-import utils
+from telebot.types import CallbackQuery, InputMediaPhoto
+from utils.types import Illust
+from utils.db import get_illust
 
 from . import bot, logger
 from .util import remove_message_reply_markup_item
 
 
-@bot.callback_query_handler(func=lambda x: re.match(r"seeall:\d+", x.data))
+@bot.callback_query_handler(func=lambda x: re.match(r"seeall:\w+:\d+", x.data))
 def seeall_query(query: CallbackQuery):
-    _, illustId = query.data.split(":")
-    # urls = illust_image_urls(iid)
-    urls = utils.pixiv.illust_image_urls(illustId)
+    illust = get_illust(query.data[query.data.index(':')+1:])
+    urls = illust.illust_image_urls()
     if urls is not None:
-        logger.info(f"Sending {illustId} all images")
+        logger.info(f"Sending {illust} all images")
         media = [InputMediaPhoto(url) for url in urls]
         bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id)
         logger.info(f"{len(urls)} images sent")

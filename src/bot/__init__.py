@@ -21,7 +21,6 @@ from .default import *
 
 def run():
     logger.info("Bot running")
-    print("running")
     bot.infinity_polling()
     
 

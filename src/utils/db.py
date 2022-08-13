@@ -8,6 +8,7 @@ import redis
 from utils import CONFIG, TOKEN
 from utils.basic_config import get_logger
 from utils.types import Illust
+from utils.region_map import MAP
 
 
 logger = get_logger(__name__)
@@ -20,13 +21,14 @@ class _DDB:
         attri = _db.__getattribute__(__name)
         if isinstance(attri, Callable):
             def warp(*args, **kwargs) -> Any:
+                logger.debug(f"{__name}(*{args}, **{kwargs})")
                 result = attri(*args, **kwargs)
-                logger.debug(f"\n\t{__name}(*{args}, **{kwargs}) \n\t -> ({type(result)}){result}")
+                logger.debug(f" -> ({type(result)}){result}")
                 return result
             return warp
         else:
             return attri
-db: redis.Redis = _DDB() if os.environ.get("DEVELOP", False) else _db
+db: redis.Redis = _DDB()
 
 
 # funcs
@@ -34,12 +36,31 @@ def get_database() -> Tuple[redis.client.Redis, Mapping[str, Any]]:
     return db, None
 
 
-def get_illust(illustId:int | str, group:str="illust") -> Illust | None:
-    res = db.hgetall(f"{group}:{illustId}") 
+def get_illust(expr:str) -> Illust | None:
+    """从数据库中读取illust并自动判断类型(定义于utils.region_map)
+
+    Args:
+        expr (str): 数据库的键
+
+    Returns:
+        Illust | None: Illust的子类
+    """
+    if not expr.startswith("illust:"):
+        expr = "illust:"+expr
+    res = db.hgetall(expr)
     if res:
-        return Illust.from_db(res)
-    else:
-        return 
+        if "region" in res:
+            region = res["region"]
+        else:
+            region = "pixiv"
+            logger.warning(f"No region: {res}")
+        if region:
+            cls = MAP[region]
+            result = cls.from_db(res)
+            logger.debug(f"{cls.__class__} instance, type {type(result)}")
+            return result
+        
+    return None
 
 
 def get_sanity_level(chatId:int | str) -> List[int]:
@@ -88,42 +109,41 @@ def set_sanity_level(chatId:int | str, expr:List[int|str]|str) -> List[str]:
 
 
 # TODO: 格式化sanity level
-def query_all_illusts_id(chatId:int, group:str, applySanity:bool) -> List[str]:
-    """查询所有图片的id
+def query_all_illusts_key(chatId:int, region:str, applySanity:bool) -> List[str]:
+    """查询所有图片的key (e.g. pixiv:1234567)
 
     Args:
         chatId (int):  
-        group (str): 
+        region (str): 
         applySanity (bool): 是否应用sanity过滤.
 
     Returns:
         List[str]: 
     """
-    imglist = [x.split(':')[-1] for x in db.keys(f"{group}:*")]
+    illustKeys = [x[x.index(':')+1:] for x in db.keys(f"illust:{region}:*")]
     userSeen = db.smembers(f"user_seen:{chatId}")
     userLevel = db.hget("sanityLevel", chatId)
     if userLevel:
         userLevel = userLevel.split(',')
     else:
         userLevel = ['0', '2', '4', '6']
-    logger.info(f"user {chatId} level: {userLevel}")
     result = []
-    for illustId in imglist:
-        if illustId in userSeen:
+    for illustKey in illustKeys:
+        if illustKey in userSeen:
             continue
         
         if applySanity:
-            illustLevel = db.hget(f"{group}:{illustId}", "sanityLevel")
+            illustLevel = db.hget(f"illust:{illustKey}", "sanityLevel")
             if not illustLevel:
                 continue
             if illustLevel not in userLevel:
                 continue
         
-        result.append(illustId)
+        result.append(illustKey)
     return result
 
 
-def feed_all_interactive(chatId:int, group:str, applySanity:bool=False) -> Generator[Illust | int, None, None]:
+def feed_all_interactive(chatId:int, region:str, applySanity:bool=False) -> Generator[Illust | int, None, None]:
     """所有图片（交互式）
     函数返回值是一个生成器，生成器迭代的第一个值是整数，表示符合条件的图片的数量
     若数量>0，接下来迭代的是Illust
@@ -131,7 +151,7 @@ def feed_all_interactive(chatId:int, group:str, applySanity:bool=False) -> Gener
     
     e.g.
     ```python
-    feed = feed_all_interactive(chatId, group)
+    feed = feed_all_interactive(chatId, region)
     num = feed.__next__()
     if num > 0:
         print(f"有{num}"张图片)
@@ -143,24 +163,23 @@ def feed_all_interactive(chatId:int, group:str, applySanity:bool=False) -> Gener
 
     Args:
         chatId (int): 
-        group (str): 
+        region (str): 
         applySanity (bool, optional): 是否应用sanity过滤. Defaults to False.
 
     Yields:
         Generator[Illust | int, None, None]: 
     """
-    imglist = query_all_illusts_id(chatId, group, applySanity=applySanity)
-    yield len(imglist)
-    if len(imglist) > 0:
-        for illustId in imglist:
-            dbDict = db.hgetall(f"{group}:{illustId}")
-            illust = Illust.from_db(dbDict)
-            db.sadd(f"user_seen:{chatId}", illustId)
+    illustKeys = query_all_illusts_key(chatId, region, applySanity=applySanity)
+    yield len(illustKeys)
+    if len(illustKeys) > 0:
+        for illustKey in illustKeys:
+            illust = get_illust(illustKey)
+            db.sadd(f"user_seen:{chatId}", illustKey)
             yield illust
 
    
-def feed_all(chatId:int, group:str, applySanity:bool=False) -> Generator[Illust, None, None]:
-    feed = feed_all_interactive(chatId, group, applySanity=applySanity)
+def feed_all(chatId:int, region:str, applySanity:bool=False) -> Generator[Illust, None, None]:
+    feed = feed_all_interactive(chatId, region, applySanity=applySanity)
     if feed.__next__():
         for illust in feed:
             yield illust
@@ -168,7 +187,7 @@ def feed_all(chatId:int, group:str, applySanity:bool=False) -> Generator[Illust,
         raise StopIteration()
     
 
-def random_feed_interactive(chatId:int, group:str="illust", applySanity:bool=True) -> Generator[Illust | bool, None, None]:
+def random_feed_interactive(chatId:int, region:str="*", applySanity:bool=True) -> Generator[Illust | bool, None, None]:
     """随机返回图片（交互式）
     函数返回值是一个生成器，生成器迭代的第一个值是bool类型，表示是否有剩余图片
     若True，接下来迭代的是Illust
@@ -176,7 +195,7 @@ def random_feed_interactive(chatId:int, group:str="illust", applySanity:bool=Tru
     
     e.g.
 ```python
-    feed = random_feed_interactive(chatId, group)
+    feed = random_feed_interactive(chatId, region)
     num = feed.__next__()
     if num:
         print(illust.id)
@@ -185,26 +204,26 @@ def random_feed_interactive(chatId:int, group:str="illust", applySanity:bool=Tru
 ```
     Args:
         chatId (int): 
-        group (str, optional): 图片所属组别. Defaults to "illust".
+        region (str, optional): 图片所属组别. Defaults to "illust".
         applySanity (bool, optional): 是否应用sanity过滤. Defaults to True.
 
     Yields:
         Generator[Illust | bool, None, None]: 
     """
-    imglist = query_all_illusts_id(chatId, group, applySanity=applySanity)
-    if len(imglist) > 0:
+    illustKeys = query_all_illusts_key(chatId, region, applySanity=applySanity)
+    if len(illustKeys) > 0:
         yield True
-        illustId = random.choice(imglist)
-        logger.info("Image {} selected".format(illustId))
-        illust = Illust.from_db(db.hgetall(f"{group}:{illustId}"))
-        db.sadd(f"user_seen:{chatId}", illustId)
+        illustKey = random.choice(illustKeys)
+        logger.info("Image {} selected".format(illustKey))
+        illust = get_illust(illustKey)
+        db.sadd(f"user_seen:{chatId}", illustKey)
         yield illust
     else:
         yield False
 
 
-def random_feed(chatid:int, group:str="illust", applySanity:bool=True) -> Optional[Illust]:
-    feed = random_feed_interactive(chatid, group, applySanity=applySanity)
+def random_feed(chatid:int, region:str="*", applySanity:bool=True) -> Optional[Illust]:
+    feed = random_feed_interactive(chatid, region, applySanity=applySanity)
     res = feed.__next__()
     if res:
         return feed.__next__()
