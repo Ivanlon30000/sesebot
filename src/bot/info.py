@@ -53,5 +53,5 @@ def set_sanity_level_query(query: CallbackQuery):
 
 @bot.message_handler(commands=["quota"])
 def echo_quota(message: Message):
-    quota = utils.db.query_all_illusts_key(message.chat.id, "illust", applySanity=True)
+    quota = utils.db.query_all_illusts_key(message.chat.id, "*", applySanity=True)
     bot.send_message(message.chat.id, f"宁有 {len(quota)} 张涩图库存")    
