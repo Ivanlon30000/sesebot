@@ -36,31 +36,32 @@ def get_database() -> Tuple[redis.client.Redis, Mapping[str, Any]]:
     return db, None
 
 
-def get_illust(expr:str) -> Illust | None:
+def get_illust(expr:str|None=None, region:str|None=None, illustId:str|int|None=None) -> Illust | None:
     """从数据库中读取illust并自动判断类型(定义于utils.region_map)
-
-    Args:
-        expr (str): 数据库的键
-
+    
     Returns:
         Illust | None: Illust的子类
     """
-    if not expr.startswith("illust:"):
-        expr = "illust:"+expr
-    res = db.hgetall(expr)
+    logger.debug(f"Get illust: {expr=}, {region=}, {illustId=}")
+    if expr is not None:
+        if not expr.startswith("illust:"):
+            expr = "illust:"+expr
+        _, region, illustId = expr.split(":")
+    elif region is not None and illustId is not None:
+        pass
+    else:
+        raise ValueError("'region' and 'illustId' must be given while 'expr' not given")
+
+    res = db.hgetall(f"illust:{region}:{illustId}")
     if res:
-        if "region" in res:
-            region = res["region"]
-        else:
-            region = "pixiv"
-            logger.warning(f"No region: {res}")
-        if region:
-            cls = MAP[region]
-            result = cls.from_db(res)
-            logger.debug(f"{cls.__class__} instance, type {type(result)}")
-            return result
+        cls = MAP[region]
+        result = cls.from_db(res)
+        logger.debug(f"{cls.__class__} instance, type {type(result)}")
+    else:
+        result = None
         
-    return None
+    logger.debug(f"Returns {result}")
+    return result
 
 
 def get_sanity_level(chatId:int | str) -> List[int]:
@@ -120,8 +121,9 @@ def query_all_illusts_key(chatId:int|None, region:str, applySanity:bool|None) ->
     Returns:
         List[str]: 
     """
+    logger.debug(f"Query all illusts: {chatId=}, {region=}, {applySanity=}")
     illustKeys = [x[x.index(':')+1:] for x in db.keys(f"illust:{region}:*")]
-    logger.info(f"{len(illustKeys)} illusts exist")
+    logger.debug(f"{len(illustKeys)} illusts exist")
     if chatId is None:
         return illustKeys
     userSeen = db.smembers(f"user_seen:{chatId}")
@@ -130,6 +132,8 @@ def query_all_illusts_key(chatId:int|None, region:str, applySanity:bool|None) ->
         userLevel = userLevel.split(',')
     else:
         userLevel = ['0', '2', '4', '6']
+    logger.debug(f"User {chatId} sanity level: {userLevel}")
+    
     result = []
     for illustKey in illustKeys:
         if illustKey in userSeen:
@@ -143,6 +147,7 @@ def query_all_illusts_key(chatId:int|None, region:str, applySanity:bool|None) ->
                 continue
         
         result.append(illustKey)
+    logger.debug(f"Returns {len(result)} illusts")
     return result
 
 
@@ -213,11 +218,12 @@ def random_feed_interactive(chatId:int, region:str="*", applySanity:bool=True) -
     Yields:
         Generator[Illust | bool, None, None]: 
     """
-    illustKeys = query_all_illusts_key(chatId, region, applySanity=applySanity)
+    logger.debug(f"Random feed illust: {chatId=}, {region=}, {applySanity=}")
+    illustKeys = query_all_illusts_key(chatId, region=region, applySanity=applySanity)
     if len(illustKeys) > 0:
         yield True
         illustKey = random.choice(illustKeys)
-        logger.info("Image {} selected".format(illustKey))
+        logger.debug(f"Image {illustKey} selected")
         illust = get_illust(illustKey)
         db.sadd(f"user_seen:{chatId}", illustKey)
         yield illust

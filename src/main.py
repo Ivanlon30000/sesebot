@@ -1,10 +1,9 @@
 from threading import Thread
+from bot import run
+from grabbers.pixiv import PixivRecommendedGrab
+from filters import TagsFilter
 
-if __name__ == "__main__":
-    import grab
-    import push
-    import botloop
-    
-    ts = [Thread(target=x.main) for x in (grab, push, botloop)]
-    [p.start() for p in ts]
-    [p.join() for p in ts]
+recGrab = PixivRecommendedGrab(filters=[TagsFilter(noTags=["R-18", "3D", "3DCG"])])
+ts = [Thread(target=x) for x in (recGrab.run, run)]
+[p.start() for p in ts]
+[p.join() for p in ts]

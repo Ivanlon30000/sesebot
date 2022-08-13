@@ -22,7 +22,4 @@ from .default import *
 def run():
     logger.info("Bot running")
     bot.infinity_polling()
-    
 
-if __name__ == "__main__":
-    run()

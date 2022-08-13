@@ -120,7 +120,7 @@ class PixivIllust(Illust):
         Returns:
             bool: 操作是否成功
         """
-        logger.info(f"Bookmark {self}")
+        logger.info(f"Do bookmark {self}")
         illustId = self.id
         tags = (self.userTags + self.authTags)
 
@@ -157,6 +157,6 @@ class PixivIllust(Illust):
             urls = [illust["image_urls"]["large"]]
         if reverseProxy:
             urls = [url.replace("i.pximg.net", reverseProxy) for url in urls]
-        logger.info(f"{self}: {pageCount} pages: {urls}")
+        logger.debug(f"{self} {pageCount} pages: \n\t{urls}")
         return urls
     

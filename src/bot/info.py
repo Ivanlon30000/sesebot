@@ -10,17 +10,16 @@ from . import bot, logger
 
 @bot.message_handler(func=lambda x: re.match(r"/level ?(.*)$", x.text))
 def set_sanity_level_message(message: Message):
-    logger.info(f"Set sanity level {message.text}")
+    logger.info(f"Set sanity level message received from {message.chat.id}: {message.text=}")
     level = utils.db.get_sanity_level(message.chat.id)
     if not level:
         level = "未设置"
-    
+    logger.info(f"Current level: {level=}")
     mat = re.match(r"/level ?(\d(,\d)*|\d?-\d?)$", message.text)
     if mat:
         expr = mat.group(1)
-        # newLevel = set_sanity_level(db, message.chat.id, expr)
         newLevel = utils.db.set_sanity_level(message.chat.id, expr)
-        logger.info(f"Old level: {level}, new level: {newLevel}")
+        logger.info(f"New level set: {newLevel=}")
         
         if newLevel:
             text = f"过滤器已设为 {newLevel}"
@@ -36,12 +35,12 @@ def set_sanity_level_message(message: Message):
         
     bot.send_message(message.chat.id, text, 
                      reply_markup=markup)
+    logger.info(f"Reply message sent")
 
 @bot.callback_query_handler(func=lambda x:re.match(r"setlevel:\d+", x.data))
 def set_sanity_level_query(query: CallbackQuery):
+    logger.info(f"Sanity level query received from {query.message.chat.id}: {query.data=}")
     sanityLevel = query.data.split(":")[-1]
-    logger.info(f"Sanity level query received: {query.data}")
-    # newLevel = set_sanity_level(db, query.message.chat.id, sanityLevel)
     newLevel = utils.db.set_sanity_level(query.message.chat.id, sanityLevel)
     if newLevel:
         bot.reply_to(query.message, f"过滤等级已设为 {newLevel}")
@@ -49,9 +48,12 @@ def set_sanity_level_query(query: CallbackQuery):
     else:
         logger.inf(f"Failed to set sanity level to {sanityLevel}")
     bot.answer_callback_query(query.id)
+    logger.info(f"Query answered")
 
 
 @bot.message_handler(commands=["quota"])
 def echo_quota(message: Message):
+    logger.info(f"Quota command received from {message.chat.id}: {message.text=}")
     quota = utils.db.query_all_illusts_key(message.chat.id, "*", applySanity=True)
-    bot.send_message(message.chat.id, f"宁有 {len(quota)} 张涩图库存")    
+    bot.send_message(message.chat.id, f"宁有 {len(quota)} 张涩图库存")
+    logger.info(f"Quota reply message sent")

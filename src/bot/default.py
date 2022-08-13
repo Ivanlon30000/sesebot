@@ -8,6 +8,7 @@ from . import bot, logger
 
 @bot.message_handler(func=lambda x: True)
 def echo(message: Message):
+    logger.info(f"Arbitrary message received from {message.chat.id}: {message.text=}")
     time = datetime.datetime.now()
     if time.minute == 0:
         text = f"{time.hour}点整"
@@ -15,3 +16,4 @@ def echo(message: Message):
         text = f"{time.hour}点{time.minute}分"
     text = f"布谷——布谷——。幽夜净土时间{text}。"
     bot.send_message(message.chat.id, text)
+    logger.info(f"Default reply sent")
