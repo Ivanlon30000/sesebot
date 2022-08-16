@@ -1,4 +1,6 @@
- - [x] Filter R-18 Tag
- - [ ] Push b/w stocking in real-time manner
- - [x] Push follow
- - [ ] Rating filter
+ - [x] Refactor bot module
+ - [x] Refactor grabber module
+ - [ ] Refactor push module
+ - [x] Refactor db module
+ - [x] Construct universal interface of illust
+ - [ ] View and edit config by webui
