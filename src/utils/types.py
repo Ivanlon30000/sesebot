@@ -1,6 +1,17 @@
+"""
+基础类
+
+SanityLevel:
+枚举类型。内容评级
+
+Illust:
+抽象类。
+用于为所有模块(bot, grab, push, db)提供一个统一的操作 setu 的接口
+"""
+
 from typing import *
 from enum import Enum
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 
 # types
 class SanityLevel(Enum):
@@ -65,7 +76,7 @@ class Illust(ABC):
         Returns:
             bool: 操作是否成功
         """ 
-        pass
+        raise NotImplementedError()
     
     @abstractmethod
     def illust_image_urls(self, **kwargs) -> List[str]:
@@ -74,4 +85,4 @@ class Illust(ABC):
         Returns:
             List[str]: 
         """
-        pass
+        raise NotImplementedError()

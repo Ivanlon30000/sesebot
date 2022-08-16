@@ -1,4 +1,3 @@
-import os
 from traceback import format_exc
 from typing import *
 
@@ -8,8 +7,7 @@ from pixivpy3.utils import PixivError
 
 from utils import TOKEN
 from utils.basic_config import get_logger
-from utils.types import Illust, SanityLevel, ILLUST_TYPE
-
+from utils.types import ILLUST_TYPE, Illust, SanityLevel
 
 logger = get_logger(__name__)
 
@@ -160,3 +158,25 @@ class PixivIllust(Illust):
         logger.debug(f"{self} {pageCount} pages: \n\t{urls}")
         return urls
     
+
+def get_following_list() -> List[int]|None:
+    """关注列表
+
+    Returns:
+        List[int]: 
+    """
+    logger.debug(f"get_following_list:")
+    ids = []
+    for restrict in ("public", "private"):
+        offset = 0
+        while True:
+            result = API.user_following(API.user_id, restrict, offset)
+            ids.extend(user['user']['id'] for user in result['user_previews'])
+            next = API.parse_qs(result["next_url"])
+            logger.debug(f"{len(ids)}, next:{next}")
+            if next is None:
+                break
+            else:
+                offset = next["offset"]
+    logger.debug(f"get_following_list done: {len(ids)}")
+    return ids

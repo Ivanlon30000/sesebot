@@ -1,4 +1,7 @@
-import os
+"""
+与数据库交互的模块
+"""
+
 import random
 import re
 from time import time
@@ -8,9 +11,8 @@ import redis
 
 from utils import CONFIG, TOKEN
 from utils.basic_config import get_logger
-from utils.types import Illust
 from utils.region_map import MAP
-
+from utils.types import Illust
 
 logger = get_logger(__name__)
 
@@ -18,6 +20,8 @@ REDIS_HOST = CONFIG["db_host"]
 REDIS_PORT = CONFIG["db_port"]
 _db = redis.Redis(REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 class _DDB:
+    """对数据库接口封装，用于debug
+    """
     def __getattribute__(self, __name: str) -> Any:
         attri = _db.__getattribute__(__name)
         if isinstance(attri, Callable):
@@ -33,7 +37,7 @@ db: redis.Redis = _DDB()
 
 
 # funcs
-def get_database() -> Tuple[redis.client.Redis, Mapping[str, Any]]:
+def get_database() -> Tuple[redis.Redis, None]:
     return db, None
 
 
@@ -248,6 +252,7 @@ def add_illust(illust:Illust, expire:int|None) -> int | None:
         db.expire(f"illust:{illust.region}:{illust.id}", expire)
     logger.debug(f"Call add_illust({illust=}, {expire=}) -> {result}")
     return result
+
 
 def get_recordtime(illust_or_expr:Illust|str) -> int | None:
     """查询illust入库时间

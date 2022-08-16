@@ -1,3 +1,13 @@
+"""
+pixiv 的 Grabber
+
+PixivGrabBase:
+pixiv 的 Grabber 基类，默认应用去重过滤器(filters.UniqueFilter)
+
+PixivRecommendedGrab:
+pixiv 推荐的 Grabber
+"""
+
 from traceback import format_exc
 from typing import *
 
@@ -10,6 +20,8 @@ from .base import GrabberBase
 
 
 class PixivGrabBase(GrabberBase):
+    """pixiv 的 Grabber 基类，默认应用去重过滤器(filters.UniqueFilter)
+    """
     def __init__(self, num: int = 60, filters: Iterable[FilterBase] = [], expire:int|None=None) -> None:
         super().__init__(num=num, filters=[UniqueFilter()]+filters, expire=expire)
 

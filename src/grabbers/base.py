@@ -1,3 +1,13 @@
+"""
+Grabber 基类
+
+抽象类
+
+添加新的Grabber只需要继承 GrabberBase 并实现 source() 方法，
+sourece() 方法：返回 utils.types.Illust 的子类的列表，是抓取到的图片
+参考：grabbers.pixiv.PixivRecommendedGrab
+"""
+
 import time
 from abc import ABC, abstractmethod
 from traceback import format_exc
@@ -21,7 +31,7 @@ class GrabberBase(ABC):
     def source(self) -> List[Illust]:
         """抓取源
         """
-        pass
+        raise NotImplementedError()
     
     def grab(self) -> Optional[List[Illust]]:
         """从源获取图片 -> 应用过滤器 -> 存入数据库
