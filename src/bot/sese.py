@@ -15,6 +15,7 @@ def sese(message: Message):
         bot.reply_to(message, "涩图来力！")
         logger.info(f"Reply sent")
         illust = feed.__next__()
+        logger.info(f"Feed {illust}")
         send_illust(message.chat.id, illust)
         logger.info(f"setu sent")
     else:
