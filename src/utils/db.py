@@ -1,6 +1,7 @@
 import os
 import random
 import re
+from time import time
 from typing import *
 
 import redis
@@ -240,5 +241,33 @@ def random_feed(chatid:int, region:str="*", applySanity:bool=True) -> Optional[I
         return None
 
 
-def add_illust(illust:Illust) -> int | None:
-    return db.hset(f"illust:{illust.region}:{illust.id}", mapping=illust.dump())
+def add_illust(illust:Illust, expire:int|None) -> int | None:
+    dumpdata = {**illust.dump(), "recordtime": int(time()*1000)}
+    result = db.hset(f"illust:{illust.region}:{illust.id}", mapping=dumpdata)
+    if expire and expire > 0:
+        db.expire(f"illust:{illust.region}:{illust.id}", expire)
+    logger.debug(f"Call add_illust({illust=}, {expire=}) -> {result}")
+    return result
+
+def get_recordtime(illust_or_expr:Illust|str) -> int | None:
+    """查询illust入库时间
+
+    Args:
+        illust (Illust | int): Illust对象或数据库key
+
+    Returns:
+        int | None: 
+    """
+    logger.debug(f"Call get_recordtime({illust_or_expr=}):")
+    if isinstance(illust_or_expr, str):
+        expr = illust_or_expr if illust_or_expr.startswith("illust:") else "illust:"+illust_or_expr
+    else:
+        expr = f"illust:{illust_or_expr.region}:{illust_or_expr.id}"
+    logger.debug(f"Parsed {expr=}")
+        
+    result = db.hget(expr)
+    logger.debug(f"Returns {result}")
+    if result:
+        return int(result)
+    else:
+        return None

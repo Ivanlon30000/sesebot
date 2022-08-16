@@ -4,10 +4,6 @@ from traceback import format_exc
 from typing import *
 
 from filters import FilterBase, _defaultFilters
-from pixivpy3 import AppPixivAPI
-from pixivpy3.utils import PixivError
-from redis import Redis
-from utils.basic_config import get_logger
 from utils.db import add_illust
 from utils.types import Illust
 
@@ -16,9 +12,10 @@ from . import logger
 
 # grabs
 class GrabberBase(ABC):
-    def __init__(self, num:int, filters:Iterable[FilterBase]=_defaultFilters) -> None:
+    def __init__(self, num:int, filters:Iterable[FilterBase]=_defaultFilters, expire:int|None=None) -> None:
         self.maxNum = num
         self.filters = filters
+        self.expire = expire
     
     @abstractmethod
     def source(self) -> List[Illust]:
@@ -41,7 +38,7 @@ class GrabberBase(ABC):
             illusts = filter(illusts)
         
         for illust in illusts:
-            res = add_illust(illust)
+            res = add_illust(illust, expire=self.expire)
             if res is None:
                 logger.warning(f"{illust} add to db error.")
 

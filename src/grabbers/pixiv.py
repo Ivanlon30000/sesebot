@@ -10,8 +10,8 @@ from .base import GrabberBase
 
 
 class PixivGrabBase(GrabberBase):
-    def __init__(self, num: int = 60, filters: Iterable[FilterBase] = []) -> None:
-        super().__init__(num=num, filters=[UniqueFilter()]+filters)
+    def __init__(self, num: int = 60, filters: Iterable[FilterBase] = [], expire:int|None=None) -> None:
+        super().__init__(num=num, filters=[UniqueFilter()]+filters, expire=expire)
 
 class PixivRecommendedGrab(PixivGrabBase):
     """抓取 pixiv 推荐
