@@ -9,8 +9,7 @@ from typing import *
 
 import redis
 
-from utils import CONFIG, TOKEN
-from utils.basic_config import get_logger
+from utils import CONFIG, TOKEN, get_logger
 from utils.region_map import MAP
 from utils.types import Illust
 

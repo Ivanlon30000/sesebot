@@ -1,8 +1,7 @@
 from typing import *
 
 import telebot
-from utils import TOKEN
-from utils.basic_config import get_logger
+from utils import TOKEN, get_logger
 
 
 logger = get_logger(__name__)

@@ -4,13 +4,11 @@ import sys
 from typing import *
 import os
 
-from utils import CONFIG
+from .const import CONFIG
 
 BASE_FMT = logging.Formatter("{asctime} - {levelname}: {message}", style="{", datefmt="%Y/%m/%d %H:%M:%S")
 MODULE_FMT = logging.Formatter("{asctime} - {levelname}: [{name}] {message}",  style="{", datefmt="%Y/%m/%d %H:%M:%S")
 
-def get_config() -> Dict[str, Any]:
-    return CONFIG
 
 def get_logger(name: str, 
                fileLogLevel=os.environ.get("fll", logging.DEBUG), 
