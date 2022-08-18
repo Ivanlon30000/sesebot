@@ -4,9 +4,10 @@ from telebot import types
 from utils import TOKEN
 from utils.types import Illust
 
-from . import bot, logger
+from . import bot, logger, logd
 
 
+@logd
 def send_illust(chatId:int, illust:Illust, reply_to:Optional[int]=None):
     logger.debug(f"Bot 'send_illust' called: {chatId=}, {illust=}")
     markup = types.InlineKeyboardMarkup()
@@ -37,7 +38,7 @@ def send_illust(chatId:int, illust:Illust, reply_to:Optional[int]=None):
                    reply_markup=markup, reply_to_message_id=reply_to)
     logger.debug(f"Photo sent: {chatId=}, {illust.url=}")
 
-
+@logd
 def remove_message_reply_markup_item(message:types.Message, markup_item:str) -> None:
     logger.debug(f"Bot 'remove_message_reply_markup_item' called: {message.id=}, {markup_item=}")
     markup = message.reply_markup.to_dict()

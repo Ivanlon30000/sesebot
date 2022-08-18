@@ -1,10 +1,12 @@
 from typing import *
 
 import telebot
-from utils import TOKEN, get_logger
+from utils import TOKEN
+from utils.log import get_logger, with_log
 
 
 logger = get_logger(__name__)
+logd = with_log(logger)
 
 bot = telebot.TeleBot(TOKEN["bot"])
 
