@@ -8,6 +8,8 @@ from utils.db import get_illust
 from . import bot, logger
 from .util import remove_message_reply_markup_item
 
+GRID_NUM = 10
+
 
 @bot.callback_query_handler(func=lambda x: re.match(r"seeall:\w+:\d+", x.data))
 def seeall_query(query: CallbackQuery):
@@ -17,14 +19,17 @@ def seeall_query(query: CallbackQuery):
     if urls is not None:
         logger.info(f"{len(urls)} for {illust}")
         media = [InputMediaPhoto(url) for url in urls]
-        if len(media) > 10:
-            for i in range(ceil(len(media)/10)):
-                start = i*10
-                end = min((i+1)*10, len(media))
-                bot.send_media_group(query.message.chat.id, media[start:end], reply_to_message_id=query.message.id)
+        logger.debug(f"{len(media)} media group")
+        
+        if len(media) > GRID_NUM:
+            for i in range(ceil(len(media)/GRID_NUM)):
+                logger.debug(f"{i=}")
+                start = i*GRID_NUM
+                end = min((i+1)*GRID_NUM, len(media))
+                bot.send_media_group(query.message.chat.id, media[start:end], reply_to_message_id=query.message.id, disable_notification=True)
                 logger.info(f"{start}-{end} pages sent")
         else:
-            bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id)
+            bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id, disable_notification=True)
         logger.info(f"Media group sent")
         remove_message_reply_markup_item(query.message, "全部")
         logger.info(f"Reply markup modified")

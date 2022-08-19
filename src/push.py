@@ -53,7 +53,7 @@ class RandomFeedJob(UserDict):
 
 
 jobs = [
-    RandomFeedJob(30, ME, region="*", applySanity=True),
+    RandomFeedJob(60, ME, region="*", applySanity=True),
 ]
 
 
