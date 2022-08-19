@@ -32,7 +32,7 @@ def send_illust(chatId:int, illust:Illust, reply_to:Optional[int]=None):
         f"{illust.title}" + (f"({illust.pageCount} pages)" if illust.pageCount > 1 else ""),
         "Artist: {}".format(illust.author),
         "Tags: {}".format(', '.join('#' + x for x in illust.authTags)),
-        "Level: {}".format(illust.sanityLevel.value)
+        "Level: {}".format(illust.sanityLevel)
     ]
     logger.debug(f"Caption constructed: {lines=}")
 
@@ -51,3 +51,8 @@ def remove_message_reply_markup_item(message:types.Message, markup_item:str) -> 
     logger.debug(f"New markup constructed")
     bot.edit_message_reply_markup(message.chat.id, message.id, reply_markup=newMarkup)
     logger.debug(f"markup edited")
+
+@logd
+@retry(times=3)
+def send_message(*args, **kwargs) -> None:
+    bot.send_message(*args, **kwargs)

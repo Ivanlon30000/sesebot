@@ -1,67 +1,116 @@
-from collections import UserDict
+from abc import ABC, abstractmethod
 from time import sleep
 from typing import *
 
 import schedule
 
-from bot.util import send_illust
+from bot.util import send_illust, send_message
 from utils.const import ME
 from utils.db import random_feed
 from utils.log import get_logger, with_log
+from utils.types import Dumpable
 
 logger = get_logger(__name__ if __name__ != "__main__" else "push")
 logd = with_log(logger)
 
 
-class RandomFeedJob(UserDict):
-    def __init__(self, interval:int, chatId:int, region:str, applySanity:bool) -> None:
+# interfaces
+class FeedJobBase(ABC):
+    def __init__(self, chatId:int, region:str='*', introMsg:str|None=None) -> None:
         super().__init__()
-        kwargs = {
-            "chatId": chatId,
-            "interval": interval,
-            "region": region,
-            "applySanity": applySanity
-        }
-        self.update(kwargs)
-        self.job = None
+        self.chatId = chatId
+        self.region = region
+        self.intro = introMsg
+        self._job = None
+    
+    @property
+    def job(self) -> schedule.Job:
+        if self._job is None:
+            raise ValueError("Call `register_job` first")
+        return self._job
+    
+    @job.setter
+    def job(self, __val) -> None:
+        self._job = __val
     
     def run(self) -> None:
+        if self.intro is not None:
+            send_message(chat_id=self.chatId, text=self.intro)
+        self.feed()
+    
+    @abstractmethod
+    def feed(self) -> None:
+        pass
+    
+    @abstractmethod
+    def register_job(self) -> schedule.Job:
+        pass
+
+    def cancel(self):
+        schedule.cancel_job(self.job)
+
+class RandomFeedJobBase(FeedJobBase):
+    def feed(self) -> None:
         logger.info(f"Random feed  for {self.chatId}")
-        illust = random_feed(self.chatId, self.region, self.applySanity)
+        illust = random_feed(self.chatId, self.region)
         if illust is None:
             logger.warning(f"No available illust for {self.chatId}, push failed")
         else:
             logger.info(f"Sending {illust} to {self.chatId}")
             send_illust(self.chatId, illust)
         logger.info(f"Random feed done.")
-        
-    def register(self) -> schedule.Job:
+
+class PeriodicalFeedJobBase(FeedJobBase):
+    def register_job(self, interval:int|None=None) -> schedule.Job:
+        if interval is not None:
+            self.interval = interval
+        elif self.interval is not None:
+            pass
+        else:
+            raise ValueError(f"interval is required")
         self.job = schedule.every(self.interval).seconds.do(self.run)
         return self.job
 
-    def cancel(self):
-        schedule.cancel_job(self.job)
-    
-    def update(self, kwargs):
-        super().update(kwargs)
-        for k, v in kwargs.items():
-            self.__setattr__(k, v)
-    
-    @classmethod
-    def from_db(cls, kwargs) -> "RandomFeedJob":
-        return cls(**kwargs)
+class TimedFeedJobBase(FeedJobBase):
+    def register_job(self, datetime:str|None=None) -> schedule.Job:
+        if datetime is not None:
+            self.datetime = datetime
+        elif self.datetime is not None:
+            pass
+        else:
+            raise ValueError(f"datetime is required")
+        self.job = schedule.every().day.at(self.datetime).do(self.run)
+        return self.job
 
+# feed classes
+class PeroidicFeedJob(RandomFeedJobBase, PeriodicalFeedJobBase, Dumpable):
+    @overload
+    def _INT_ATTR(cls) -> Iterable[str]:
+        return {"interval", "chatId"}
+    
+    @overload
+    def _STRING_ATTR(cls) -> Iterable[str]:
+        return {"region"}
 
+class TimedFeedJob(RandomFeedJobBase, TimedFeedJobBase, Dumpable):
+    @overload
+    def _INT_ATTR(cls) -> Iterable[str]:
+        return {"chatId"}
+    
+    @overload
+    def _STRING_ATTR(cls) -> Iterable[str]:
+        return {"region", "datetime"}
+    
+    
 jobs = [
-    RandomFeedJob(60, ME, region="*", applySanity=True),
+    PeroidicFeedJob(ME).register_job(1800),
+    TimedFeedJob(ME, introMsg="早安涩图来力！").register_job("12:00"),
+    TimedFeedJob(ME, introMsg="晚安涩图来力！").register_job("00:00"),
 ]
 
 
 def run():
     logger.info(f"Start push loop")
-    logger.info(f"{len(jobs)} jobs to register")
-    for job in jobs:
-        job.register()
     logger.info(f"{len(jobs)} jobs registered")
     
     while True:
@@ -70,3 +119,4 @@ def run():
         
 if __name__ == "__main__":
     run()
+    
