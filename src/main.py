@@ -1,9 +1,17 @@
 from threading import Thread
+from time import sleep
 from bot import run
-from grabbers.pixiv import PixivRecommendedGrab
-from filters import TagsFilter
+import grab
+import push
 
-recGrab = PixivRecommendedGrab(filters=[TagsFilter(noTags=["R-18", "3D", "3DCG"])])
-ts = [Thread(target=x) for x in (recGrab.run, run)]
+def schedule():
+    grab.sc.run_pending()
+    push.sc.run_pending()
+    sleep(1)
+
+ts = [
+    Thread(target=run),
+    Thread(target=schedule)
+]
 [p.start() for p in ts]
 [p.join() for p in ts]
