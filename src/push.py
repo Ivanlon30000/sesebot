@@ -5,10 +5,11 @@ from typing import *
 import schedule
 
 from bot.util import send_illust
+from utils.const import ME
 from utils.db import random_feed
 from utils.log import get_logger, with_log
 
-logger = get_logger(__name__)
+logger = get_logger(__name__ if __name__ != "__main__" else "push")
 logd = with_log(logger)
 
 
@@ -34,7 +35,7 @@ class RandomFeedJob(UserDict):
             send_illust(self.chatId, illust)
         logger.info(f"Random feed done.")
         
-    def start(self) -> schedule.Job:
+    def register(self) -> schedule.Job:
         self.job = schedule.every(self.interval).seconds.do(self.run)
         return self.job
 
@@ -50,12 +51,22 @@ class RandomFeedJob(UserDict):
     def from_db(cls, kwargs) -> "RandomFeedJob":
         return cls(**kwargs)
 
-from utils.const import ME
 
-job = RandomFeedJob(30, ME, region="*", applySanity=True)
-# job.start()
+jobs = [
+    RandomFeedJob(30, ME, region="*", applySanity=True),
+]
 
-job.run()
-# while True:
-#     schedule.run_pending()
-#     sleep(1)
+
+def run():
+    logger.info(f"Start push loop")
+    logger.info(f"{len(jobs)} jobs to register")
+    for job in jobs:
+        job.register()
+    logger.info(f"{len(jobs)} jobs registered")
+    
+    while True:
+        schedule.run_pending()
+        sleep(1)
+        
+if __name__ == "__main__":
+    run()

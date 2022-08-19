@@ -1,3 +1,4 @@
+from math import ceil
 import re
 from typing import *
 
@@ -16,7 +17,14 @@ def seeall_query(query: CallbackQuery):
     if urls is not None:
         logger.info(f"{len(urls)} for {illust}")
         media = [InputMediaPhoto(url) for url in urls]
-        bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id)
+        if len(media) > 10:
+            for i in range(ceil(len(media)/10)):
+                start = i*10
+                end = min((i+1)*10, len(media))
+                bot.send_media_group(query.message.chat.id, media[start:end], reply_to_message_id=query.message.id)
+                logger.info(f"{start}-{end} pages sent")
+        else:
+            bot.send_media_group(query.message.chat.id, media, reply_to_message_id=query.message.id)
         logger.info(f"Media group sent")
         remove_message_reply_markup_item(query.message, "全部")
         logger.info(f"Reply markup modified")
