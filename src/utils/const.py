@@ -6,3 +6,5 @@ with open("config.json") as fp:
     
 with open("token.json") as fp:
     TOKEN = json.load(fp)
+
+ME = TOKEN["chatid_me"]

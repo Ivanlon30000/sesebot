@@ -11,7 +11,7 @@ class JudgeFailedException(Exception):
 
 def retry(times:int=3, judge:Callable[[Any], bool]|None=None, 
           callback:Callable[[bool, List[Tuple[Any, Optional[Exception]]]], Any]|None=None, 
-          ignore:bool=False, wait:float=0) -> Callable:
+          ignore:bool=False, wait:float=0):
     """“重试”装饰器
     被装饰的函数重试至多 `times` 次
     
@@ -38,7 +38,7 @@ def callback_function(isSuccess:bool, results:List[Tuple[Any, Optional[Exception
         Callable: 
     """
     assert isinstance(times, int) and times > 0
-    def decorator(func) -> Callable:
+    def decorator(func):
         @wraps(func)
         def __retry_func(*args, **kwargs):
             execResults = []
@@ -53,7 +53,7 @@ def callback_function(isSuccess:bool, results:List[Tuple[Any, Optional[Exception
                 except Exception as e:
                     exception = e
                 else:
-                    if judge(result):
+                    if judge is None or judge(result):
                         successFlag = True
                     else:
                         exception = JudgeFailedException()
@@ -65,8 +65,10 @@ def callback_function(isSuccess:bool, results:List[Tuple[Any, Optional[Exception
                 
                 if wait > 0:
                     time.sleep(wait)
+                    
+            if callback is not None:
+                callback(successFlag, execResults)
                 
-            callback(successFlag, execResults)
             if successFlag:
                 return result
             else:

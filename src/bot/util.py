@@ -3,11 +3,13 @@ from typing import *
 from telebot import types
 from utils import TOKEN
 from utils.types import Illust
-
+from utils import retry
+from utils.log import with_log
 from . import bot, logger, logd
 
 
 @logd
+@retry(times=3)
 def send_illust(chatId:int, illust:Illust, reply_to:Optional[int]=None):
     logger.debug(f"Bot 'send_illust' called: {chatId=}, {illust=}")
     markup = types.InlineKeyboardMarkup()
@@ -39,6 +41,7 @@ def send_illust(chatId:int, illust:Illust, reply_to:Optional[int]=None):
     logger.debug(f"Photo sent: {chatId=}, {illust.url=}")
 
 @logd
+@retry(times=3)
 def remove_message_reply_markup_item(message:types.Message, markup_item:str) -> None:
     logger.debug(f"Bot 'remove_message_reply_markup_item' called: {message.id=}, {markup_item=}")
     markup = message.reply_markup.to_dict()

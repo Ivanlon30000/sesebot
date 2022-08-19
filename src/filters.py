@@ -1,6 +1,7 @@
 from typing import *
 from utils.types import Illust
 from utils.db import query_all_illusts_key
+import re
 
 class FilterBase:
     def condition(self, illust:Illust) -> bool:
@@ -36,5 +37,13 @@ class TagsFilter(FilterBase):
             return self.whitelist == 0 or all(x in tags for x in self.whitelist)
         else:
             return False
+   
+class RegionFilter(FilterBase):
+    def __init__(self, region:str|re.Pattern) -> None:
+        super().__init__()
+        self.regionPattern = region if isinstance(region, re.Pattern) else re.compile(region) 
+    
+    def condition(self, illust: Illust) -> bool:
+        return re.match(self.regionPattern, illust.region)
     
 _defaultFilters = [AllpassFilter()]

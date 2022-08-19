@@ -40,13 +40,14 @@ def with_log(logger:logging.Logger|None=None, level:int=logging.DEBUG):
     if logger is None:
         logger = logging.root
     def decorator(func:Callable):
-        @wraps
+        @wraps(func)
         def func_with_log(*args, **kwargs):
             logger.log(level, "Call {}({}, {})".format(
                 func.__name__,
                 ', '.join(f"({type(x)}){x}" for x in args),
                 ', '.join(f"{k}=({type(v)}){v}" for k, v in kwargs.items())
             ))
-            return func(*args, **kwargs)
+            result = func(*args, **kwargs)
+            logger.log(level, f"\tReturns ({type(result)}){result}")
         return func_with_log
     return decorator
