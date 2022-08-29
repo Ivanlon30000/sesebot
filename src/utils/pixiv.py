@@ -18,15 +18,16 @@ class _PAPI:
     maxTry: int
     
     def __init__(self) -> None:
-        self.auth(refresh_token=TOKEN["pixiv"])
+        # self.auth(refresh_token=TOKEN["pixiv"])
         # _papi.auth()
+        self.auth()
         
     def __getattribute__(self, name: str) -> Any:
         # self own attri
         # print(name)
         selfattri = {
             "api": _papi,
-            # "auth": lambda refresh_token=None: _papi.auth(refresh_token=TOKEN["pixiv"] if refresh_token is None else refresh_token),
+            "auth": lambda refresh_token=None: _papi.auth(refresh_token=TOKEN["pixiv"] if refresh_token is None else refresh_token),
             "maxTry": 3,
         }
         if name in selfattri:

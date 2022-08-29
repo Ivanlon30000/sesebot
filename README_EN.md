@@ -1,23 +1,29 @@
 # sese bot
 
-
-# Deploy  
-## Environment
-`pip install -r requirements.txt`  
-
-## Config
+## Get Token
 1. Create Telegram Bot  
-Create your Telegram bot according to [Official Docs](https://core.telegram.org/bots#3-how-do-i-create-a-bot), and get the token of your telegram bot.
-
+Create Telegram bot and get the token according to [Officials Manual](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 2. Get Pixiv refresh token  
-Obtain Pixiv refresh token using [`gppt`](https://github.com/eggplants/get-pixivpy-token).
+Use [`gppt`](https://github.com/eggplants/get-pixivpy-token) to get Pixiv refresh token
 
-3. Install Redis  
-Install [`Redis`](https://github.com/redis/redis)
 
-4. Configure `sese boot`  
-Rename `config.json.example` to `config.json`. 
-Rename `token.json.example` to `token.json` and place your telegram bot token and pixiv refresh token at `pixiv` and `bot` 
+## Deploy  
+### Use Docker (Recommended)  
+1. Download `config` folder and `docker-compose.yml` with file structure below:
+```
+sesebot/
+    config/
+        config.json
+        token.json
+    docker-compose.yml
+```
+2. Fill your pixiv token and telegrame bot token into `token.json`
+3. In `sesebot` folder, execute `docker compose up -d`
 
-## Run   
-`python src/main.py`
+### Use raw Python3.10
+1. Clone this repository
+2. `pip install -r requirements.txt`  
+3. Install [`Redis`](https://github.com/redis/redis)
+2. Fill your pixiv token and telegrame bot token into `token.json`
+3. Fill host and port of your redis server into `config.json`
+4. `python src/main.py`
