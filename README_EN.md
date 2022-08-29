@@ -9,7 +9,7 @@ Use [`gppt`](https://github.com/eggplants/get-pixivpy-token) to get Pixiv refres
 
 ## Deploy  
 ### Use Docker (Recommended)  
-1. Download `config` folder and `docker-compose.yml` with file structure below:
+1. Download `config` folder and `docker-compose.yml` with file structure as below:
 ```
 sesebot/
     config/
