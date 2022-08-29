@@ -1,0 +1,15 @@
+version: "2.1"
+services:
+  sesebot:
+    image: ivanlon/sesebot:alpha
+    container_name: sesebot
+    volumes:
+      - ./config:/config
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: sesedb
+    restart: unless-stopped

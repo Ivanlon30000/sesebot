@@ -130,7 +130,11 @@ dmypy.json
 .pyre/
 
 # personal privacy
+token.json
+
+config.json
 
 log/*
 tmp.*
 **/tmp.*
+config/

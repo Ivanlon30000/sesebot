@@ -1,6 +1,6 @@
  - [x] Refactor bot module
  - [x] Refactor grabber module
- - [ ] Refactor push module
+ - [x] Refactor push module
  - [x] Refactor db module
  - [x] Construct universal interface of illust
  - [ ] View and edit config by webui

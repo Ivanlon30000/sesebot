@@ -18,14 +18,15 @@ class _PAPI:
     maxTry: int
     
     def __init__(self) -> None:
-        self.auth()
+        self.auth(refresh_token=TOKEN["pixiv"])
+        # _papi.auth()
         
     def __getattribute__(self, name: str) -> Any:
         # self own attri
         # print(name)
         selfattri = {
             "api": _papi,
-            "auth": lambda refresh_token=None: _papi.auth(refresh_token=TOKEN["pixiv"] if refresh_token is None else refresh_token),
+            # "auth": lambda refresh_token=None: _papi.auth(refresh_token=TOKEN["pixiv"] if refresh_token is None else refresh_token),
             "maxTry": 3,
         }
         if name in selfattri:
@@ -91,9 +92,9 @@ class PixivIllust(Illust):
         self.author = pixJson["user"]["name"]
         self.authorId = pixJson["user"]["id"]
         if pixJson["x_restrict"] == 1:
-            self.sanityLevel = SanityLevel.e
+            self.sanityLevel = SanityLevel.e.value
         else:
-            self.sanityLevel = SanityLevel(pixJson["sanity_level"])
+            self.sanityLevel = pixJson["sanity_level"]
         url = pixJson["image_urls"]["large"]
         if reverseProxy:
             self.url = url.replace("i.pximg.net", reverseProxy)

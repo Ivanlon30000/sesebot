@@ -5,9 +5,11 @@ import grab
 import push
 
 def schedule():
-    grab.sc.run_pending()
-    push.sc.run_pending()
-    sleep(1)
+    grab.sc.run_all()
+    while True:
+        grab.sc.run_pending()
+        push.sc.run_pending()
+        sleep(1)
 
 ts = [
     Thread(target=run),

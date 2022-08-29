@@ -12,8 +12,7 @@ from . import bot, logger
 def set_sanity_level_message(message: Message):
     logger.info(f"Set sanity level message received from {message.chat.id}: {message.text=}")
     level = utils.db.get_sanity_level(message.chat.id)
-    if not level:
-        level = "未设置"
+
     logger.info(f"Current level: {level=}")
     mat = re.match(r"/level ?(\d(,\d)*|\d?-\d?)$", message.text)
     if mat:
@@ -27,7 +26,7 @@ def set_sanity_level_message(message: Message):
             text = "过滤器表达式错误，支持的表达式：\n1. ','分割: 2,4,6\n2. '-'分割: 2-6"
         markup = None
     else:
-        text = f"当前过滤等级：{','.join(str(x) for x in level)}\n设置新的过滤等级：\n(只推送小于或等于指定等级以下的涩图)"
+        text = f"当前过滤等级：{','.join(str(x) for x in level) if level is not None else '未设置'}\n设置新的过滤等级：\n(只推送小于或等于指定等级以下的涩图)"
         markup = quick_markup({
             "≦2": {"callback_data": "setlevel:0-2"},
             "≦4": {"callback_data": "setlevel:0-4"},
