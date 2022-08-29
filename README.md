@@ -20,7 +20,8 @@ sesebot/
     docker-compose.yml
 ```
 2. 在 `token.json` 中填入 pixiv token 和 telegrame bot token
-3. 在 `sesebot` 中执行 `docker compose up -d`
+3. 在 `sesebot` 中执行 `docker compose up -d`  
+   (支持 `x64` 和 `arm64`，如果你的CPU架构是 `arm64`，需要将 `docker-compose.yml` 中的 `amd64` tag 改为 `arm64`)
 
 ### 使用 Python3.10
 1. 克隆本项目

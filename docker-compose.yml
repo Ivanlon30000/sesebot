@@ -1,7 +1,7 @@
 version: "2.1"
 services:
   sesebot:
-    image: ivanlon/sesebot:alpha
+    image: ivanlon/sesebot:amd64
     container_name: sesebot
     volumes:
       - ./config:/config

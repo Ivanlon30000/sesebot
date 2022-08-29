@@ -19,6 +19,7 @@ sesebot/
 ```
 2. Fill your pixiv token and telegrame bot token into `token.json`
 3. In `sesebot` folder, execute `docker compose up -d`
+(only support `x64` and `arm64` architecture, if your device's arch is `arm64`, please modify the image tag in `docker-compose.yml` to `arm64`)
 
 ### Use raw Python3.10
 1. Clone this repository
