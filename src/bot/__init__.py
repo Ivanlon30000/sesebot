@@ -1,7 +1,7 @@
 from typing import *
 
 import telebot
-from utils import TOKEN
+from utils.const import TOKEN
 from utils.log import get_logger, with_log
 
 

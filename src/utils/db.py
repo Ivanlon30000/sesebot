@@ -9,14 +9,15 @@ from typing import *
 
 import redis
 
-from utils import CONFIG, TOKEN, get_logger
+from utils.log import get_logger
+from utils.const import CONFIG, TOKEN
 from utils.region_map import MAP
 from utils.types import Illust
 
 logger = get_logger(__name__)
 
-REDIS_HOST = CONFIG["db_host"]
-REDIS_PORT = CONFIG["db_port"]
+REDIS_HOST = CONFIG["db"]["host"]
+REDIS_PORT = CONFIG["db"]["port"]
 _db = redis.Redis(REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 class _DDB:
     """对数据库接口封装，用于debug

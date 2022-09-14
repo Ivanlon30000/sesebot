@@ -17,9 +17,9 @@ def get_logger(name: str,
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
-    os.makedirs(CONFIG["log_path"], exist_ok=True)
+    os.makedirs(CONFIG["log"]["path"], exist_ok=True)
     #hdlrFile = logging.FileHandler(os.path.join(CONFIG["log_path"], f"{name}.log"))
-    hdlrFile = RotatingFileHandler(os.path.join(CONFIG["log_path"], f"{name}.log"), mode='a', maxBytes=4096*1024, backupCount=4, encoding="utf8")
+    hdlrFile = RotatingFileHandler(os.path.join(CONFIG["log"]["path"], f"{name}.log"), mode='a', maxBytes=4096*1024, backupCount=4, encoding="utf8")
     hdlrFile.setLevel(fileLogLevel)
     hdlrFile.setFormatter(BASE_FMT)
     logger.addHandler(hdlrFile)
@@ -30,7 +30,7 @@ def get_logger(name: str,
     logger.addHandler(hdlrStream)
     
     # hdlrAll = logging.FileHandler(os.path.join(CONFIG["log_path"], "main.log"))
-    hdlrAll = RotatingFileHandler(os.path.join(CONFIG["log_path"], "main.log"), mode='a', maxBytes=4096*1024, backupCount=4, encoding="utf8")
+    hdlrAll = RotatingFileHandler(os.path.join(CONFIG["log"]["path"], "main.log"), mode='a', maxBytes=4096*1024, backupCount=4, encoding="utf8")
     hdlrAll.setLevel(fileLogLevel)
     hdlrAll.setFormatter(MODULE_FMT)
     logger.addHandler(hdlrAll)

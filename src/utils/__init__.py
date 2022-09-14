@@ -1,8 +1,6 @@
 from functools import wraps
 from typing import *
 
-from .const import CONFIG, TOKEN
-from .log import get_logger
 import time
 
 class JudgeFailedException(Exception):

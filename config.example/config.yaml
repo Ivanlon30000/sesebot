@@ -1,0 +1,18 @@
+log:
+  path: "/log"  # log dir
+
+db:
+  host: "redis"
+  port: 6379
+
+push:
+  interval: 3600
+  list:
+    - 1234567789
+    - 9876543210
+
+grab:
+  interval: 3600
+  num: 60
+
+expire: 86400

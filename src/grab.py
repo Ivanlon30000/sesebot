@@ -4,7 +4,7 @@ import schedule
 
 from filters import TagsFilter
 from grabbers.pixiv import PixivRecommendedGrab
-from utils import CONFIG
+from utils.const import CONFIG
 from utils.log import get_logger
 
 logger = get_logger("grab")
@@ -15,7 +15,7 @@ grabbers = [
 ]
 
 sc = schedule.Scheduler()
-jobs = [sc.every(CONFIG["interval"]).seconds.do(grabber.grab) for grabber in grabbers]
+jobs = [sc.every(CONFIG["grab"]["interval"]).seconds.do(grabber.grab) for grabber in grabbers]
 
 
 def main():

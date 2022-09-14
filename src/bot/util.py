@@ -1,7 +1,7 @@
 from typing import *
 
 from telebot import types
-from utils import TOKEN
+from utils.const import TOKEN
 from utils.types import Illust
 from utils import retry
 from utils.log import with_log
@@ -23,7 +23,7 @@ def send_illust(chatId:int, illust:Illust, reply_to:Optional[int]=None):
         markup.row(btnHome)
     logger.debug(f"Homepage button added: {btnHome.url}")
     
-    if str(chatId) == str(TOKEN['chatid_me']):
+    if str(chatId) == str(TOKEN['me']):
         btnBookmark = types.InlineKeyboardButton(text="收藏", callback_data=f'like:{illust.region}:{illust.id}')
         markup.row(btnBookmark)
         logger.debug(f"Message send to 'ME', bookmark button added: {btnBookmark.callback_data}")

@@ -5,7 +5,7 @@ from typing import *
 import schedule
 
 from bot.util import send_illust, send_message
-from utils.const import ME
+from utils.const import CONFIG, TOKEN
 from utils.db import random_feed
 from utils.log import get_logger, with_log
 from utils.types import Dumpable
@@ -118,9 +118,7 @@ class ImmediatePushJob:
 
 
 jobs = [
-    PeroidicFeedJob(ME).register_job(1800),
-    TimedFeedJob(ME, introMsg="早安涩图来力！").register_job("12:00"),
-    TimedFeedJob(ME, introMsg="晚安涩图来力！").register_job("00:00"),
+    *(PeroidicFeedJob(chatid).register_job(CONFIG["push"]["interval"]) for chatid in CONFIG["push"]["list"]),
 ]
 
 

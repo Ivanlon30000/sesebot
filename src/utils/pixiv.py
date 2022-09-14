@@ -5,7 +5,8 @@ import pixivpy3
 from pixivpy3.aapi import _RESTRICT as RESTRICT_TYPE
 from pixivpy3.utils import PixivError
 
-from utils import TOKEN, get_logger
+from utils.log import get_logger
+from utils.const import TOKEN
 from utils.types import ILLUST_TYPE, Illust, SanityLevel
 
 logger = get_logger(__name__)
