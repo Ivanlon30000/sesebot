@@ -4,7 +4,7 @@ import sys
 from typing import *
 import os
 from functools import wraps
-
+from logging.handlers import RotatingFileHandler
 from .const import CONFIG
 
 BASE_FMT = logging.Formatter("{asctime} - {levelname}: {message}", style="{", datefmt="%Y/%m/%d %H:%M:%S")
@@ -18,7 +18,8 @@ def get_logger(name: str,
     logger.setLevel(logging.DEBUG)
 
     os.makedirs(CONFIG["log_path"], exist_ok=True)
-    hdlrFile = logging.FileHandler(os.path.join(CONFIG["log_path"], f"{name}.log"))
+    #hdlrFile = logging.FileHandler(os.path.join(CONFIG["log_path"], f"{name}.log"))
+    hdlrFile = RotatingFileHandler(os.path.join(CONFIG["log_path"], f"{name}.log"), mode='a', maxBytes=4096*1024, backupCount=4, encoding="utf8")
     hdlrFile.setLevel(fileLogLevel)
     hdlrFile.setFormatter(BASE_FMT)
     logger.addHandler(hdlrFile)
@@ -28,7 +29,8 @@ def get_logger(name: str,
     hdlrStream.setFormatter(MODULE_FMT)
     logger.addHandler(hdlrStream)
     
-    hdlrAll = logging.FileHandler(os.path.join(CONFIG["log_path"], "main.log"))
+    # hdlrAll = logging.FileHandler(os.path.join(CONFIG["log_path"], "main.log"))
+    hdlrAll = RotatingFileHandler(os.path.join(CONFIG["log_path"], "main.log"), mode='a', maxBytes=4096*1024, backupCount=4, encoding="utf8")
     hdlrAll.setLevel(fileLogLevel)
     hdlrAll.setFormatter(MODULE_FMT)
     logger.addHandler(hdlrAll)
