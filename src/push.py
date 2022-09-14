@@ -121,11 +121,10 @@ jobs = [
     *(PeroidicFeedJob(chatid).register_job(CONFIG["push"]["interval"]) for chatid in CONFIG["push"]["list"]),
 ]
 
-
 def main():
     logger.info(f"Start push loop")
     logger.info(f"{len(jobs)} jobs registered")
-
+    
     while True:
         sc.run_pending()
         sleep(1)

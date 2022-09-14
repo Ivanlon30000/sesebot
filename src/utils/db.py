@@ -276,3 +276,22 @@ def get_recordtime(illust_or_expr:Illust|str) -> int | None:
         return int(result)
     else:
         return None
+
+def get_all_push_job() -> Dict[int, int]:
+    """查询推送任务
+
+    Returns:
+        Dict[int, int]: {chatid: interval}
+    """
+    logger.debug(f"Call get_all_push_job():")
+    result = db.hgetall("push_job")
+    return result
+
+def set_push_job(chatId: int|str, interval:int) -> None:
+    """
+    Args:
+        chatId (int | str): 
+        interval (int): 
+    """
+    logger.debug(f"Call set_push_job({chatId=},{interval=}):")
+    db.hset("push_job", chatId, interval)
